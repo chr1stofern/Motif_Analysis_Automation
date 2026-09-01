@@ -1,0 +1,15 @@
+[project]
+name = "motif-analysis-local"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "argparse>=1.4.0",
+    "matplotlib>=3.11.1",
+    "pandas>=3.0.5",
+    "pathlib>=1.0.1",
+    "scipy>=1.18.1",
+    "seaborn>=0.13.2",
+    "snakemake>=9.25.1",
+]

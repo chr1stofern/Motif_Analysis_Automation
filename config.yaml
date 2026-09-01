@@ -1,0 +1,64 @@
+# config.yaml
+
+# Input and output directories
+input_dir: "fg_d129"
+# input_dir: "fg_t136"
+# input_dir: "fg_n1060"
+output_dir: "kplogo_output"
+input_suffix: "_weighted_plogo_input_v2.txt"
+
+# kpLogo path (if not in PATH)
+kpLogo_path: "kpLogo"
+
+# background input
+bg_file: "EGFP-C1_8nt.txt"
+
+# kpLogo parameters
+max_k: 1
+min_count: 0
+p_cutoff: 0.05
+fdr: false
+# markov: 1
+region: null
+weighted: false
+ranked: false
+extra_args: "-plot s -stack_order 1 -fix 1.1 -pseudo 2.5"
+
+# LaTeX Generation
+latex_cols: 7
+latex_font_size: "\\scriptsize"
+latex_page_margin: "0.4cm"
+latex_logo_types:
+  - "plogo"
+  - "kplogo"
+latex_page_titles:
+  plogo: "Probability Logo (pLogo)"
+  kplogo: "K-Mer Probability Logo (kpLogo)"
+latex_output: "All-Samples"
+
+# Heatmap Generation
+# Heatmap parameters (defaults for all positions)
+heatmap_title: null                    # Custom title (null = auto-generate with position number)
+heatmap_use_stats: true                # Use test statistics vs p-values
+heatmap_cmap: "inferno"                 # Colormap
+heatmap_vmin: -62                     # Min color scale
+heatmap_vmax: 62                     # Max color scale
+eff_vmin: -2.2
+eff_vmax: 0.7
+heatmap_figsize: [6, 8]                # Figure size (width, height)
+heatmap_fontsize: 10                   # Annotation font size
+heatmap_annot: false                    # Show cell values
+heatmap_fmt: ".2f"                     # Number formatz
+heatmap_square: false                   # Square cells
+# skip_patterns:
+#   - "NT"
+#   - "-NT"
+skip_samples:
+  # - 1-Psp-D129D-NT
+  # - 1-Psp-WT-NT
+  # - 1-Psp-WT-D129NT
+  # - 1-Psp-WT-N1060NT
+  # - 1-Psp-WT-T136NT
+# Combined Heatmap
+combine_positions: [3, 4, 5]           # Positions to combine
+combined_output: "combined_heatmap"    # Output filename (without extension)
