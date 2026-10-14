@@ -1,0 +1,91 @@
+#!/usr/local/bin/snakemake
+
+import sys; sys.path.append('/home/kwonschul/notebooks')
+import time
+
+# 
+#
+
+RAW_DATA_DIR = '/usersdata/joelamkc/hku_ngs/250720_novaseq70'
+
+
+SAMPLES = ['A13-dict-oKW2182']
+
+LANE = "L2"
+READ = 1
+
+ADAPTER_5P = 'GGCCACCGCACACCATG'
+ADAPTER_3P = 'CAACCACACACCTG'  # This is not the full-length 3' common seq; however, due to the low seq quality at 3' end, I use a short seq here
+
+RANDOM_AT_3P = 0 # random n mer before 3p adaptor
+#RANDOM_AT_3P = -4 # random n mer before 3p adaptor
+
+MIN_QUAL = 30
+MIN_QUALIFIED = 90
+MIN_LEN = 35
+MAX_LEN = 35
+
+#GENOME_DIR = '/home/kwonschul/data/genome/STAR_GENCODE_hg38'
+#ANNOTATION_GTF = '/home/kwonschul/data/genome/GENCODE/hg38_GENCODE41/gencode.v41.annotation.gtf'
+
+
+# write a log for each run
+DATE = time.strftime('%y%m%d')
+LOG = 'logs/%s.log' % DATE
+logf = open(LOG, 'a')
+STAMP = '========== NEW RUN at %s ==========\n' % time.time()
+logf.write(STAMP)
+logf.close()
+
+
+rule all:
+	input: 'logs/%s.log' % DATE,
+#			expand('qualitycheck/{sample}_L2_1.fastqc.zip', sample=SAMPLES),
+			expand('data/{sample}.trim.fastq.gz', sample=SAMPLES),
+			expand('data/{sample}.trim.trim3part.fastq.gz', sample=SAMPLES),
+			expand('data/{sample}.trim.qc.fastq.gz', sample=SAMPLES),
+			expand('data/{sample}.collapsed.fa.gz', sample=SAMPLES),
+			expand('data/{sample}.collapsed.tsv', sample=SAMPLES)
+
+rule make_log:
+    output: 'logs/%s.log' % DATE
+    shell: 'echo "{STAMP}" > {output}'
+
+#rule fastqc:
+#    output: 'qualitycheck/{sample}_L2_1.fastqc.zip'
+#    threads: 32
+#    shell: 'fastqc -o qualitycheck -t {threads} {RAW_DATA_DIR}/{wildcards.sample}_L2_1.fq.gz'
+
+rule trim_adaptor:
+    output: 'data/{sample}.trim.fastq.gz'
+    shell: 'cutadapt {RAW_DATA_DIR}/{wildcards.sample}_{LANE}_{READ}.fq.gz \
+            --cores 30 -g {ADAPTER_5P}...{ADAPTER_3P} --trimmed-only 2>> {LOG} | \
+			gzip -c - > {output}'
+
+rule trim_random_adaptor_sequences:
+    input: 'data/{sample}.trim.fastq.gz'
+    output: 'data/{sample}.trim.trim3part.fastq.gz'
+    shell: 'cutadapt {input} -u {RANDOM_AT_3P} -m {MIN_LEN} -M {MAX_LEN} --cores 30 2>> {LOG} | \
+			gzip -c - > {output}'
+
+rule quality_filter:
+    input: 'data/{sample}.trim.trim3part.fastq.gz'
+    output: 'data/{sample}.trim.qc.fastq.gz'
+    shell: 'zcat {input} | \
+            fastq_quality_filter - -v -Q33 -q {MIN_QUAL} -p {MIN_QUALIFIED} 2>> {LOG} | \
+            gzip -c - > {output}'
+
+rule collapsing:
+    input: 'data/{sample}.trim.qc.fastq.gz'
+    output: 'data/{sample}.collapsed.fa.gz'
+    shell: 'zcat {input} | \
+			fastx_collapser - -Q33 2>> {LOG} | \
+			gzip -c - > {output}'
+
+rule convert_to_tsv:
+    input: 'data/{sample}.collapsed.fa.gz'
+    output: 'data/{sample}.collapsed.tsv'
+    shell: 'zcat {input} | \
+			seqkit fx2tab 2>> {LOG} > {output}'
+
+

@@ -1,4 +1,5 @@
-# Snakefile
+#!/usr/local/bin/snakemake
+
 
 import os
 import glob
@@ -29,21 +30,24 @@ configfile: "config.yaml"
 # 2. DEFINE PATHS AND FUNCTIONS
 # ============================================
 INTERMEDIATE_DIR = config.get("intermediate_dir", "intermediate_files")
-OUTPUT_DIR = config.get("output_dir", "output")
 PPSEQ_DIR = config.get("preprocessed-seq_dir", "preprocessed_sequences")
+OUTPUT_DIR = config.get("output_dir", "output")
+LOGO_DIR = os.path.join(OUTPUT_DIR, "logo")
+
 KP_LOGO = config.get("kpLogo_path", "kpLogo")
-BATCH_NAME = INTERMEDIATE_DIR.split("_")[1]
-BATCH_LOGO_DIR = os.path.join(OUTPUT_DIR, "logo", BATCH_NAME)
 
-def get_samples():
+def get_ppseq():
     #return sorted sample file names as list
-    samples = []
+    ppseq = []
     dir_path = os.path.join(INTERMEDIATE_DIR, PPSEQ_DIR)
-    samples = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f)) and not f.startswith('.')]
-    return sorted(samples)
+    # **** file extension is stripped here ****
+    ppseq = [f.replace(".txt", "") for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f)) and not f.startswith('.')]
+    
+    print(ppseq)
+    return sorted(ppseq)
 
-SAMPLES = get_samples()
-print("Found " + str(len(SAMPLES)) + " samples: " + str(SAMPLES))
+PPSEQ = get_ppseq()
+print("Found " + str(len(PPSEQ)) + " samples: " + str(PPSEQ))
 
 def get_bg_file_path():
     bg_file = config.get("bg_file", None)
@@ -69,35 +73,35 @@ print("Using kpLogo at: " + KP_LOGO_ABS)
 rule all:
     input:
         # Image files (now under logo/batch/sample/image/)
-        expand(os.path.join(BATCH_LOGO_DIR, "{sample}/image/{sample}.info.eps"), sample=SAMPLES)
+        expand(os.path.join(LOGO_DIR, "{sample}/image/{sample}.info.eps"), sample=PPSEQ)
 
 # 4. RULE: run_kpLogo #Add minimal mode where all output except .plogo is kept for ease of organisation
 # ============================================
 rule run_kpLogo:
     input:
-        # seq = INTERMEDIATE_DIR + "/{sample}" + INPUT_SUFFIX
-        seq = INTERMEDIATE_DIR + "/" + PPSEQ_DIR + "/{sample}"
+        # **** file extension is added back here ****
+        seq = INTERMEDIATE_DIR + "/" + PPSEQ_DIR + "/{sample}" + ".txt"
     output:
         # Image files
-        freq_eps = os.path.join(BATCH_LOGO_DIR, "{sample}/image/{sample}.freq.eps"),
-        freq_pdf = os.path.join(BATCH_LOGO_DIR, "{sample}/image/{sample}.freq.pdf"),
-        freq_png = os.path.join(BATCH_LOGO_DIR, "{sample}/image/{sample}.freq.png"),
-        info_eps = os.path.join(BATCH_LOGO_DIR, "{sample}/image/{sample}.info.eps"),
-        info_pdf = os.path.join(BATCH_LOGO_DIR, "{sample}/image/{sample}.info.pdf"),
-        info_png = os.path.join(BATCH_LOGO_DIR, "{sample}/image/{sample}.info.png"),
-        kplogo_eps = os.path.join(BATCH_LOGO_DIR, "{sample}/image/{sample}.kplogo.eps"),
-        kplogo_pdf = os.path.join(BATCH_LOGO_DIR, "{sample}/image/{sample}.kplogo.pdf"),
-        kplogo_png = os.path.join(BATCH_LOGO_DIR, "{sample}/image/{sample}.kplogo.png"),
-        plogo_eps = os.path.join(BATCH_LOGO_DIR, "{sample}/image/{sample}.plogo.eps"),
-        plogo_pdf = os.path.join(BATCH_LOGO_DIR, "{sample}/image/{sample}.plogo.pdf"),
-        plogo_png = os.path.join(BATCH_LOGO_DIR, "{sample}/image/{sample}.plogo.png"),
-        all_pdf = os.path.join(BATCH_LOGO_DIR, "{sample}/image/{sample}.all.pdf"),
+        freq_eps = os.path.join(LOGO_DIR, "{sample}/image/{sample}.freq.eps"),
+        freq_pdf = os.path.join(LOGO_DIR, "{sample}/image/{sample}.freq.pdf"),
+        freq_png = os.path.join(LOGO_DIR, "{sample}/image/{sample}.freq.png"),
+        info_eps = os.path.join(LOGO_DIR, "{sample}/image/{sample}.info.eps"),
+        info_pdf = os.path.join(LOGO_DIR, "{sample}/image/{sample}.info.pdf"),
+        info_png = os.path.join(LOGO_DIR, "{sample}/image/{sample}.info.png"),
+        kplogo_eps = os.path.join(LOGO_DIR, "{sample}/image/{sample}.kplogo.eps"),
+        kplogo_pdf = os.path.join(LOGO_DIR, "{sample}/image/{sample}.kplogo.pdf"),
+        kplogo_png = os.path.join(LOGO_DIR, "{sample}/image/{sample}.kplogo.png"),
+        plogo_eps = os.path.join(LOGO_DIR, "{sample}/image/{sample}.plogo.eps"),
+        plogo_pdf = os.path.join(LOGO_DIR, "{sample}/image/{sample}.plogo.pdf"),
+        plogo_png = os.path.join(LOGO_DIR, "{sample}/image/{sample}.plogo.png"),
+        all_pdf = os.path.join(LOGO_DIR, "{sample}/image/{sample}.all.pdf"),
         # Data files
-        pwm_txt = os.path.join(BATCH_LOGO_DIR, "{sample}/data/{sample}.pwm.txt"),
-        pass_cutoff_txt = os.path.join(BATCH_LOGO_DIR, "{sample}/data/{sample}.pass.p.cutoff.txt"),
-        pass_cutoff_inf = os.path.join(BATCH_LOGO_DIR, "{sample}/data/{sample}.pass.p.cutoff.txt.inf"),
-        most_sig_txt = os.path.join(BATCH_LOGO_DIR, "{sample}/data/{sample}.most.significant.each.position.txt"),
-        bonferroni = os.path.join(BATCH_LOGO_DIR, "{sample}/data/{sample}.Bonferroni.significant.frequency.txt")
+        pwm_txt = os.path.join(LOGO_DIR, "{sample}/data/{sample}.pwm.txt"),
+        pass_cutoff_txt = os.path.join(LOGO_DIR, "{sample}/data/{sample}.pass.p.cutoff.txt"),
+        pass_cutoff_inf = os.path.join(LOGO_DIR, "{sample}/data/{sample}.pass.p.cutoff.txt.inf"),
+        most_sig_txt = os.path.join(LOGO_DIR, "{sample}/data/{sample}.most.significant.each.position.txt"),
+        bonferroni = os.path.join(LOGO_DIR, "{sample}/data/{sample}.Bonferroni.significant.frequency.txt")
     params:
         min_count = config.get("min_count", 5),
         p_cutoff = config.get("p_cutoff", 0.05),
@@ -107,9 +111,7 @@ rule run_kpLogo:
         weighted = config.get("weighted", True),
         ranked = config.get("ranked", False),
         bg_file = BG_FILE_ABS,
-        extra = config.get("extra_args", "")
-    log:
-        "logs/{sample}.log"
+        extra = config.get("extra_args", ""),
     threads:
         1
     resources:
@@ -132,11 +134,11 @@ rule run_kpLogo:
         print(f"Job temporary directory: {job_root}")
         
         # Ghostscript options
-        os.environ['GS_OPTIONS'] = '-dAutoRotatePages=/None'
+        # os.environ['GS_OPTIONS'] = '-dAutoRotatePages=/None'
         
-        # Create destination directories inside BATCH_LOGO_DIR
-        image_dir = os.path.join(BATCH_LOGO_DIR, sample, "image")
-        data_dir = os.path.join(BATCH_LOGO_DIR, sample, "data")
+        # Create destination directories inside LOGO_DIR
+        image_dir = os.path.join(LOGO_DIR, sample, "image")
+        data_dir = os.path.join(LOGO_DIR, sample, "data")
         os.makedirs(image_dir, exist_ok=True)
         os.makedirs(data_dir, exist_ok=True)
 
@@ -163,6 +165,7 @@ rule run_kpLogo:
             elif params.ranked:
                 cmd.append("-ranked")
 
+            MAX_K = config.get("max_k", 4)
             cmd.extend(["-max_k", str(MAX_K)])
             cmd.extend(["-minCount", str(params.min_count)])
 
@@ -190,7 +193,7 @@ rule run_kpLogo:
             print(f"Working in: {work_dir}")
             
             # Run kpLogo
-            shell(" ".join(cmd), log=log[0])
+            shell(" ".join(cmd))
 
             # ============================================================
             # Robust file moving: list all files in work_dir and move
@@ -280,28 +283,19 @@ rule run_kpLogo:
 
 
 rule clean_logo:
-    run:
-        # Remove logs directory and its contents if present
-        shell("rm -rf logs")
-        # Remove the 'done' text file if it exists
-        shell("rm -f done")
-        # Remove the 'exit_with_error' file if it exists
-        shell("rm -f exit_with_error")
-        # Remove image output directory
-        shell("rm -rf " + shlex.quote(OUTPUT_DIR))
+    # run:/
+    # Remove the 'done' text file if it exists
+    # Remove logo output directory
+    shell:
+        """
+        rm -f done
+        rm -rf {LOGO_DIR}
+        """
 
 rule clean_all:
-    run:
-        # Remove logs directory and its contents if present
-        shell("rm -rf logs")
-        # Remove the 'done' text file if it exists
-        shell("rm -f done")
-        # Remove the 'exit_with_error' file if it exists
-        shell("rm -f exit_with_error")
-        # Remove image output directory
-        shell("rm -rf " + shlex.quote(OUTPUT_DIR))
-        # Remove temporary and LaTeX auxiliary files
-        shell("rm -rf " + shlex.quote(OUTPUT_DIR + "/*/*.tmp"))
-        shell("rm -f " + "*.aux " + "*.log " + "*.out")
-        # Remove generated LaTeX files
-        shell("rm -f *.tex *.pdf")
+    shell:
+        """
+        rm -f done
+        rm -rf {INTERMEDIATE_DIR}
+        rm -rf {OUTPUT_DIR}
+        """
