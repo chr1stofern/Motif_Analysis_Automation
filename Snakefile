@@ -28,35 +28,22 @@ configfile: "config.yaml"
 # ============================================
 # 2. DEFINE PATHS AND FUNCTIONS
 # ============================================
-INPUT_DIR = config.get("input_dir", "fg")
-OUTPUT_DIR = config.get("output_dir", "kplogo_output")
-INPUT_SUFFIX = config.get("input_suffix", "_weighted_plogo_input_v2.txt")
+INTERMEDIATE_DIR = config.get("intermediate_dir", "intermediate_files")
+OUTPUT_DIR = config.get("output_dir", "output")
+PPSEQ_DIR = config.get("preprocessed-seq_dir", "preprocessed_sequences")
 KP_LOGO = config.get("kpLogo_path", "kpLogo")
-BATCH_NAME = INPUT_DIR.split("_")[1]
+BATCH_NAME = INTERMEDIATE_DIR.split("_")[1]
 BATCH_LOGO_DIR = os.path.join(OUTPUT_DIR, "logo", BATCH_NAME)
 
 def get_samples():
-    pattern = os.path.join(INPUT_DIR, "*" + INPUT_SUFFIX)
-    files = glob.glob(pattern)
+    #return sorted sample file names as list
     samples = []
-    for f in files:
-        basename = os.path.basename(f)
-        sample = basename.replace(INPUT_SUFFIX, "")
-        samples.append(sample)
-    
-    # Sort by numeric prefix (e.g., "1", "2", "3", ..., "10", "11", ...)
-    def extract_number(s):
-        # Extract the leading number before the first dash
-        parts = s.split("-")
-        try:
-            return int(parts[0])
-        except ValueError:
-            return 999  # Put samples without numbers at the end
-    
-    return sorted(samples, key=extract_number)
+    dir_path = os.path.join(INTERMEDIATE_DIR, PPSEQ_DIR)
+    samples = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f)) and not f.startswith('.')]
+    return sorted(samples)
 
-def get_input_file(wildcards):
-    return os.path.join(INPUT_DIR, wildcards.sample + INPUT_SUFFIX)
+SAMPLES = get_samples()
+print("Found " + str(len(SAMPLES)) + " samples: " + str(SAMPLES))
 
 def get_bg_file_path():
     bg_file = config.get("bg_file", None)
@@ -71,44 +58,25 @@ def get_kpLogo_path():
         return KP_LOGO
     if os.path.exists(KP_LOGO):
         return os.path.abspath(KP_LOGO)
-    import shutil
     which_kpLogo = shutil.which(KP_LOGO)
     if which_kpLogo:
         return which_kpLogo
     raise Exception("kpLogo not found. Please install with: conda install -c bioconda kplogo")
 
-SAMPLES = get_samples()
-print("Found " + str(len(SAMPLES)) + " samples: " + str(SAMPLES))
-
 KP_LOGO_ABS = get_kpLogo_path()
 print("Using kpLogo at: " + KP_LOGO_ABS)
 
-# LaTeX parameters (read from config or use defaults)
-COLS = config.get("latex_cols", 7)
-FIGURE_HEIGHT = config.get("latex_figure_height", "2cm")
-FONT_SIZE = config.get("latex_font_size", "\\scriptsize")
-PAGE_MARGIN = config.get("latex_page_margin", "0.4cm")
-LOGO_TYPES = config.get("latex_logo_types", ["plogo", "kplogo"])
-PAGE_TITLES = config.get("latex_page_titles", {
-    "plogo": "Probability Logo (pLogo)",
-    "kplogo": "K-Mers Probability Logo (kpLogo)"
-})
-MAX_K = config.get("max_k", 4)
-LATEX_OUTPUT = config.get("latex_output", "Combine")
-
-# ============================================
-# 3. RULE: all
-# ============================================
 rule all:
     input:
         # Image files (now under logo/batch/sample/image/)
         expand(os.path.join(BATCH_LOGO_DIR, "{sample}/image/{sample}.info.eps"), sample=SAMPLES)
-# ============================================
+
 # 4. RULE: run_kpLogo #Add minimal mode where all output except .plogo is kept for ease of organisation
 # ============================================
 rule run_kpLogo:
     input:
-        seq = INPUT_DIR + "/{sample}" + INPUT_SUFFIX
+        # seq = INTERMEDIATE_DIR + "/{sample}" + INPUT_SUFFIX
+        seq = INTERMEDIATE_DIR + "/" + PPSEQ_DIR + "/{sample}"
     output:
         # Image files
         freq_eps = os.path.join(BATCH_LOGO_DIR, "{sample}/image/{sample}.freq.eps"),
@@ -309,9 +277,8 @@ rule run_kpLogo:
             # Clean up the entire job directory
             shutil.rmtree(job_root, ignore_errors=True)
             print(f"Cleaned up: {job_root}")
-# ============================================
-# 9. RULE: clean
-# ============================================
+
+
 rule clean_logo:
     run:
         # Remove logs directory and its contents if present
@@ -323,9 +290,6 @@ rule clean_logo:
         # Remove image output directory
         shell("rm -rf " + shlex.quote(OUTPUT_DIR))
 
-# ============================================
-# 10. RULE: clean_all (includes removing all output)
-# ============================================
 rule clean_all:
     run:
         # Remove logs directory and its contents if present

@@ -1,17 +1,15 @@
 # config.yaml
 
-# Input and output directories
-input_dir: "fg_d129"
-# input_dir: "fg_t136"
-# input_dir: "fg_n1060"
-output_dir: "kplogo_output"
-input_suffix: "_weighted_plogo_input_v2.txt"
-
-# kpLogo path (if not in PATH)
-kpLogo_path: "kpLogo"
+# Input, intermediate output and output directories
+intermediate_dir: "intermediate_files"
+preprocessed-seq_dir: "preprocessed_sequences"
+output_dir: "output"
 
 # background input
 bg_file: "EGFP-C1_8nt.txt"
+
+# kpLogo path (if not in PATH)
+kpLogo_path: "kpLogo"
 
 # kpLogo parameters
 max_k: 1
