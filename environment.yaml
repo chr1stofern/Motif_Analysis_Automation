@@ -1,0 +1,8 @@
+name: kplogo_env
+channels:
+  - conda-forge
+  - genomedk
+dependencies:
+  - genomedk::kplogo
+  - conda-forge::imagemagick
+  - conda-forge::ghostscript
