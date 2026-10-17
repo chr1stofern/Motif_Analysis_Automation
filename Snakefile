@@ -1,6 +1,5 @@
 #!/usr/local/bin/snakemake
 
-
 import os
 import glob
 import shutil
@@ -34,8 +33,6 @@ PPSEQ_DIR = config.get("preprocessed-seq_dir", "preprocessed_sequences")
 OUTPUT_DIR = config.get("output_dir", "output")
 LOGO_DIR = os.path.join(OUTPUT_DIR, "logo")
 
-KP_LOGO = config.get("kpLogo_path", "kpLogo")
-
 def get_ppseq():
     #return sorted sample file names as list
     ppseq = []
@@ -58,14 +55,10 @@ if BG_FILE_ABS:
     print("Using background file: " + BG_FILE_ABS)
 
 def get_kpLogo_path():
-    if os.path.isabs(KP_LOGO):
-        return KP_LOGO
-    if os.path.exists(KP_LOGO):
-        return os.path.abspath(KP_LOGO)
-    which_kpLogo = shutil.which(KP_LOGO)
+    which_kpLogo = shutil.which(kplogo)
     if which_kpLogo:
         return which_kpLogo
-    raise Exception("kpLogo not found. Please install with: conda install -c bioconda kplogo")
+    raise Exception("kpLogo not found. Please install according to Installation Guide in the README file")
 
 KP_LOGO_ABS = get_kpLogo_path()
 print("Using kpLogo at: " + KP_LOGO_ABS)
