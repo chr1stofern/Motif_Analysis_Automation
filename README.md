@@ -12,10 +12,13 @@ conda install anaconda::conda
 Clone the repo from github
 
 ### Setting Up kpLogo:
-Run the following command to install kplogo and its dependencies via conda:
-conda env create -f environment.yaml
+Run the following command to create an environment with the necessary dependencies, including kplogo, via conda:
+conda env create -f environment.yaml --solver=libmamba
+(On older versions of Conda where libmamba may not be installed, install it by running the following first:
+conda install conda-forge::conda-libmamba-solver
+then create the environment.)
 
-Then, activate the conda environment with:
+Activate the conda environment with:
 conda activate kplogo_env                   
 
 ## How to Use
@@ -26,7 +29,7 @@ First, deactivate the conda environment:
 conda deactivate.
 
 Then, remove the conda environment:
-conda env remove -n kplogo_env,
+conda env remove -n kplogo_env
 
 and clear the package cache:
-conda clean --packages --tarballs.
+conda clean --packages --tarballs

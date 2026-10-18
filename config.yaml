@@ -1,9 +1,13 @@
 # config.yaml
 
 # Input, intermediate output and output directories
+input_dir: "/home/chulfyp1/data/250720_novaseq70"
 intermediate_dir: "intermediate_files"
 preprocessed-seq_dir: "preprocessed_sequences"
+#preprocessed-seq_dir is located inside intermediate_dir
+
 output_dir: "output"
+sample_sheet: "samples.csv"
 
 # background input
 bg_file: "EGFP-C1_8nt.txt"

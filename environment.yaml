@@ -2,7 +2,11 @@ name: kplogo_env
 channels:
   - conda-forge
   - genomedk
+  - bioconda
 dependencies:
   - genomedk::kplogo
   - conda-forge::imagemagick
   - conda-forge::ghostscript
+  - bioconda::cutadapt
+  - bioconda::fastx_toolkit
+  - bioconda::seqkit

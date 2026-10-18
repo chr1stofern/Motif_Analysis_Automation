@@ -6,7 +6,7 @@ import time
 # 
 #
 
-RAW_DATA_DIR = '/usersdata/joelamkc/hku_ngs/250720_novaseq70'
+RAW_DATA_DIR = '/home/chulfyp1/data/250720_novaseq70'
 
 
 SAMPLES = ['A1-Lbu-noPro',

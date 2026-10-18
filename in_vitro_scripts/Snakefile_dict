@@ -1,12 +1,12 @@
 #!/usr/local/bin/snakemake
 
 import sys; sys.path.append('/home/kwonschul/notebooks')
-import time
+import os, time
 
 # 
 #
 
-RAW_DATA_DIR = '/usersdata/joelamkc/hku_ngs/250720_novaseq70'
+RAW_DATA_DIR = '/home/chulfyp1/data/250720_novaseq70'
 
 
 SAMPLES = ['A13-dict-oKW2182']
@@ -25,11 +25,8 @@ MIN_QUALIFIED = 90
 MIN_LEN = 35
 MAX_LEN = 35
 
-#GENOME_DIR = '/home/kwonschul/data/genome/STAR_GENCODE_hg38'
-#ANNOTATION_GTF = '/home/kwonschul/data/genome/GENCODE/hg38_GENCODE41/gencode.v41.annotation.gtf'
-
-
 # write a log for each run
+os.makedirs('logs', exist_ok=True)
 DATE = time.strftime('%y%m%d')
 LOG = 'logs/%s.log' % DATE
 logf = open(LOG, 'a')
