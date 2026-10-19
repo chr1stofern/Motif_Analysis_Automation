@@ -1,12 +1,17 @@
 # config.yaml
 
 # Input, intermediate output and output directories
-input_dir: "/home/chulfyp1/data/250720_novaseq70"
+input_dir: "/home/chulfyp1/data/test_download"
 intermediate_dir: "intermediate_files"
-preprocessed-seq_dir: "preprocessed_sequences"
+preprocessed_seq_dir: "preprocessed_sequences"
 #preprocessed-seq_dir is located inside intermediate_dir
 
 output_dir: "output"
+replicate_dirs:
+  1: "250720_novaseq70"
+  2: "251106_novaseq85"
+#Raw NGS reads should be put in input_dir/replicate_dirs
+
 sample_sheet: "samples.csv"
 
 # background input

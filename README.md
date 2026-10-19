@@ -1,6 +1,34 @@
 # Title Here
 
 ## Overview
+### Experiment
+In vitro cleavage site mapping using random substrates
+
+Samples involved (Rep1, novaseq70; Rep 2, novaseq85):
+Lbu-noPro  
+Lbu-16  
+Lwa-noPro  
+Lwa-16  
+Psp-noPro  
+Psp-16  
+bt3-noPro  
+bt3-16  
+Rx-noPro  
+Rx-16  
+dict-oKWW2182  
+
+### What the Code Does
+1. Raw NGS Reads Preprocessing
+- adaptor trimming: use different 3' sequences for dictionary (dict) and cleavage (clv) sequences
+- clv: trim the last 4 nt
+- assign min and max length after cutadapt (MIN: 35 for dict, 1 for clv; MAX: both 35)
+2. Motif Analysis
+- both: draw a histogram to check the cutoff
+- dict: Get 5' sequences with the selected length
+- pandas: pd.merge. Use the length number to get the sequences near the cleavage position
+- Calculate the mean of each 2/3nt motif
+- Make a scatterplot to compare rep1 and 2 to see which motifs are more frequently cleaved
+- generate plogo to visualise significant motifs
 
 ## Prerequisites
 Note that this package is designed to be run on a Linux distribution as the kplogo conda package is only available for linux-64 on the genomedk channel. You may also choose to install kplogo with other methods, but this is not recommended. Alternatively, if you wish to obtain the logos manually using pLogo's web server, you may skip "Setting Up kpLogo" in the "Installation Guide" and refer to the "How to Use" section.
@@ -11,7 +39,7 @@ conda install anaconda::conda
 ## Installation Guide
 Clone the repo from github
 
-### Setting Up kpLogo:
+### Setting Up Conda Environment:
 Run the following command to create an environment with the necessary dependencies, including kplogo, via conda:
 conda env create -f environment.yaml --solver=libmamba
 (On older versions of Conda where libmamba may not be installed, install it by running the following first:
@@ -19,14 +47,28 @@ conda install conda-forge::conda-libmamba-solver
 then create the environment.)
 
 Activate the conda environment with:
-conda activate kplogo_env                   
+conda activate motif_analysis_env                   
 
 ## How to Use
+### Configuring Parameters
+config.yaml
 
+### Downloading & Naming Samples
+To download the raw NGS data necessary for reproducing figures in our publication, please run the bash script fetch_raw.sh with the syntax:
+./fetch_raw.sh [samples.csv] [raw_dir]
+(Be sure to add execution rights before running: chmog +x ./fetch_raw.sh)
+The download process will take a while. If the process crashed mid-run, simply run it again. Files that are already downloaded will be skipped.
+
+Alternately, you may also download the raw data via the [SRA Explorer](https://sra-explorer.info/#) and search for the accession number GSE313507. Include all 22 files within the series and click "Add to collection". Click on "22 saved datasets" and run the automatically generated download script of your choice.
+
+Please make sure filenames of RAW NGS sequences follow the pattern: {replicate}_{protein}-{type}.fastq.gz, e.g., 1_Lbu-NP.fastq.gz. Note that only read 1 (forward read) is required. 
+
+### Parameters for Cleavage and Dictionary Type Samples
+Parameters, including adapter sequences and length, for each sample can be changed in samples.csv. Simply use the csv file provided for reproducing the original figures. You may change the parameters based on your on experiment.
 
 ## Cleanup Guide
 First, deactivate the conda environment:
-conda deactivate.
+conda deactivate
 
 Then, remove the conda environment:
 conda env remove -n kplogo_env

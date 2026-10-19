@@ -1,4 +1,4 @@
-name: kplogo_env
+name: motif_analysis_env
 channels:
   - conda-forge
   - genomedk
