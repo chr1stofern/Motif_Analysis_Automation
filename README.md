@@ -5,17 +5,18 @@
 In vitro cleavage site mapping using random substrates
 
 Samples involved (Rep1, novaseq70; Rep 2, novaseq85):
-Lbu-noPro  
-Lbu-16  
-Lwa-noPro  
-Lwa-16  
-Psp-noPro  
-Psp-16  
-bt3-noPro  
-bt3-16  
-Rx-noPro  
-Rx-16  
-dict-oKWW2182  
+
+Lbu: No Protein  
+Lbu: Targetting crRNA 
+Lwa: No Protein
+Lwa: Targetting crRNA  
+Psp: No Protein
+Psp: Targetting crRNA  
+bt3: No Protein  
+bt3: Targetting crRNA  
+Rfx: No Protein
+Rfx: Targetting crRNA  
+Dictionary: oKWW2182  
 
 ### What the Code Does
 1. Raw NGS Reads Preprocessing
@@ -57,7 +58,7 @@ config.yaml
 To download the raw NGS data necessary for reproducing figures in our publication, please run the bash script fetch_raw.sh with the syntax:
 ./fetch_raw.sh [samples.csv] [raw_dir]
 (Be sure to add execution rights before running: chmog +x ./fetch_raw.sh)
-The download process will take a while. If the process crashed mid-run, simply run it again. Files that are already downloaded will be skipped.
+Please ensure your device or server of choice has sufficient storage space. The download process will take a while. If the process crashed mid-run or some samples failed to download, simply run it again. Files that are already downloaded will be skipped. Please check that a total of 22 files of the extension .fastq.gz are downloaded.
 
 Alternately, you may also download the raw data via the [SRA Explorer](https://sra-explorer.info/#) and search for the accession number GSE313507. Include all 22 files within the series and click "Add to collection". Click on "22 saved datasets" and run the automatically generated download script of your choice.
 
