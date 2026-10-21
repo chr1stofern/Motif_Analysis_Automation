@@ -10,3 +10,4 @@ dependencies:
   - bioconda::cutadapt
   - bioconda::fastx_toolkit
   - bioconda::seqkit
+  - sracha

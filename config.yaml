@@ -3,6 +3,7 @@
 # Input, intermediate output and output directories
 input_dir: "/home/chulfyp1/data/test_download"
 intermediate_dir: "intermediate_files"
+logo_input_dir: "logo_input"
 preprocessed_seq_dir: "preprocessed_sequences"
 #preprocessed-seq_dir is located inside intermediate_dir
 

@@ -58,7 +58,7 @@ config.yaml
 To download the raw NGS data necessary for reproducing figures in our publication, please run the bash script fetch_raw.sh with the syntax:
 ./fetch_raw.sh [samples.csv] [raw_dir]
 (Be sure to add execution rights before running: chmog +x ./fetch_raw.sh)
-Please ensure your device or server of choice has sufficient storage space. The download process will take a while. If the process crashed mid-run or some samples failed to download, simply run it again. Files that are already downloaded will be skipped. Please check that a total of 22 files of the extension .fastq.gz are downloaded.
+Please ensure your device or server of choice has sufficient storage space. The download process will considerable time. If the process crashed mid-run or some samples failed to download, simply run it again. Files that are already downloaded will be skipped. Please check that a total of 22 files of the extension .fastq.gz are downloaded.
 
 Alternately, you may also download the raw data via the [SRA Explorer](https://sra-explorer.info/#) and search for the accession number GSE313507. Include all 22 files within the series and click "Add to collection". Click on "22 saved datasets" and run the automatically generated download script of your choice.
 
