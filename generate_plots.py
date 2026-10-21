@@ -297,7 +297,7 @@ for sLabelRep, sClvName, dfClvConcat in lAllMappedClv:
         flierprops={"marker": "d", "markerfacecolor": "black", "markeredgecolor": "black"},
         ax=ax,
     )
-
+    ax.set_xlabel('') 
     xticklabels = [t.get_text() for t in ax.get_xticklabels()]
     ax.set_xticks(range(len(xticklabels)))                                    # ← silences the warning
     ax.set_xticklabels([f'{lbl} (n={counts[lbl]})' for lbl in xticklabels], rotation=90)
@@ -462,7 +462,7 @@ for sLabelRep, sClvName, dfClvConcat in lAllMappedClv:
             n_gtt       = len(groups['GTT']),
             p_value     = p,
         ))
-
+ax.set_xlabel('')
 plt.tight_layout(rect=[0, 0, 1, 0.95])
 plt.savefig(os.path.join(sOutputDir, 'main_fig', 'fig2f_psp_clv-eff.pdf'), dpi=1200)
 plt.close()
