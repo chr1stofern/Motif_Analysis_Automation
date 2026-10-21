@@ -46,7 +46,13 @@ def display_name(sClvName):
     typ_disp = {'NP': 'noProtein', 'CR': 'withProtein', 'DT': 'dict'}[typ]
     return f'{prot}-{typ_disp}'
 
-cfg = load_config("config.yaml")
+# at the top of generate_plots.py
+try:
+    cfg_path = snakemake.params.config_path
+except NameError:
+    cfg_path = "config.yaml"                     # when run as `python generate_plots.py`
+cfg = load_config(cfg_path)
+
 m   = load_manifest(cfg)
 
 sOutputDir = cfg["output_dir"]

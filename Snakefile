@@ -7,11 +7,14 @@ import pandas as pd
 configfile: "config.yaml"
 
 RAW_DATA_DIR = config.get("input_dir", "input_dir")
-# REP_DIRS = {str(k): str(v) for k, v in config["replicate_dirs"].items()}
 INTERMEDIATE_DIR = config.get("intermediate_dir", "intermediate_files")
 PPSEQ_DIR = os.path.join(INTERMEDIATE_DIR, config.get("preprocessed_seq_dir", "preprocessed_sequences"))
+OUTPUT_DIR = config["output_dir"]
 os.makedirs(INTERMEDIATE_DIR, exist_ok=True)
 os.makedirs(PPSEQ_DIR,        exist_ok=True)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+os.makedirs(os.path.join(OUTPUT_DIR, "main_fig"), exist_ok=True)
+os.makedirs(os.path.join(OUTPUT_DIR, "supp_fig"), exist_ok=True)
 
 # meta = pd.read_csv(config.get("sample_sheet", "samples.csv")).set_index("sample")
 # meta = pd.read_csv(config["sample_sheet"]).set_index(["replicate", "sample"])
@@ -38,11 +41,30 @@ logf.write(STAMP)
 logf.close()
 
 rule all:
-	input: 'logs/%s.log' % DATE,
-#			expand('qualitycheck/{sample}_L2_1.fastqc.zip', sample=SAMPLES),
-            # expand(f'{PPSEQ_DIR}/{{sample}}.collapsed.tsv', sample=SAMPLES),
-            # expand(f'{PPSEQ_DIR}/{{replicate}}/{{sample}}.collapsed.tsv', zip, replicate=[r for (r, _) in PAIRS], sample=[s for (_, s) in PAIRS])
-            expand(f'{PPSEQ_DIR}/{{replicate}}_{{protein}}-{{type}}.collapsed.tsv', zip, replicate=[r for (r, _, _) in PAIRS], protein=[p for (_, p, _) in PAIRS], type=[t for (_, _, t) in PAIRS])
+    input:
+        f'logs/{DATE}.log',
+        expand(f'{PPSEQ_DIR}/{{replicate}}_{{protein}}-{{type}}.collapsed.tsv',
+               zip,
+               replicate=[r for (r, _, _) in PAIRS],
+               protein=[p for (_, p, _) in PAIRS],
+               type=[t for (_, _, t) in PAIRS]),        
+        # expand('qualitycheck/{sample}_L2_1.fastqc.zip', sample=SAMPLES),
+        # expand(f'{PPSEQ_DIR}/{{sample}}.collapsed.tsv', sample=SAMPLES),
+        # expand(f'{PPSEQ_DIR}/{{replicate}}/{{sample}}.collapsed.tsv', zip, replicate=[r for (r, _) in PAIRS], sample=[s for (_, s) in PAIRS])
+    
+        # plots + tables
+        expand(f'{OUTPUT_DIR}/main_fig/fig2c_{{p}}_motif-clv-eff.pdf', p=['lbu','lwa','bt3','rfx']),
+        f'{OUTPUT_DIR}/main_fig/fig2e_psp_motif-clv-eff.pdf',
+        f'{OUTPUT_DIR}/main_fig/fig2f_psp_clv-eff.pdf',
+        f'{OUTPUT_DIR}/main_fig/fig2_psp_mann-whitney.tsv',
+        f'{OUTPUT_DIR}/supp_fig/supp3ab_dict_depth.png',
+        f'{OUTPUT_DIR}/supp_fig/supp4a_rep1_clv_depth.png',
+        f'{OUTPUT_DIR}/supp_fig/supp4b_rep2_clv_depth.png',
+        f'{OUTPUT_DIR}/supp_fig/supp5a_rep1_clv_eff.png',
+        f'{OUTPUT_DIR}/supp_fig/supp5b_rep2_clv_eff.png',
+        f'{OUTPUT_DIR}/supp_fig/supp6a_psp_clv-eff.pdf',
+        f'{INTERMEDIATE_DIR}/{config["logo_input_dir"]}/TopSeqForLogo_260129v1.xlsx',
+        f'{OUTPUT_DIR}/mapped_clv_seq_full.xlsx',
 
 #rule fastqc:
 #    output: 'qualitycheck/{sample}_L2_1.fastqc.zip'
@@ -53,7 +75,6 @@ rule trim_adaptor:
     input:  f'{RAW_DATA_DIR}/{{replicate}}_{{protein}}-{{type}}.fastq.gz'
     output: f'{PPSEQ_DIR}/{{replicate}}_{{protein}}-{{type}}.trim.fastq.gz'
     params:
-        # input_dir  = lambda w: os.path.join(RAW_DATA_DIR, REP_DIRS[w.replicate]),
         adapter_5p = lambda w: meta.loc[(w.replicate, w.protein, w.type), "adapter_5p"],
         adapter_3p = lambda w: meta.loc[(w.replicate, w.protein, w.type), "adapter_3p"],
         # adapter_5p = lambda w: meta.loc[(w.replicate, w.sample), "adapter_5p"],
@@ -92,3 +113,33 @@ rule convert_to_tsv:
     output: f'{PPSEQ_DIR}/{{replicate}}_{{protein}}-{{type}}.collapsed.tsv'
     shell: 'zcat {input} | \
 			seqkit fx2tab 2>> {LOG} > {output}'
+
+# Call generate_plots.py
+rule generate_plots:
+    input:
+        expand(f'{PPSEQ_DIR}/{{replicate}}_{{protein}}-{{type}}.collapsed.tsv',
+               zip,
+               replicate=[r for (r, _, _) in PAIRS],
+               protein=[p for (_, p, _) in PAIRS],
+               type=[t for (_, _, t) in PAIRS]),
+        config["sample_sheet"],
+    output:
+        # main figures
+        expand(f'{OUTPUT_DIR}/main_fig/fig2c_{{p}}_motif-clv-eff.pdf', p=['lbu','lwa','bt3','rfx']),
+        f'{OUTPUT_DIR}/main_fig/fig2e_psp_motif-clv-eff.pdf',
+        f'{OUTPUT_DIR}/main_fig/fig2f_psp_clv-eff.pdf',
+        f'{OUTPUT_DIR}/main_fig/fig2_psp_mann-whitney.tsv',
+        # supplementary figures
+        f'{OUTPUT_DIR}/supp_fig/supp3ab_dict_depth.png',
+        f'{OUTPUT_DIR}/supp_fig/supp4a_rep1_clv_depth.png',
+        f'{OUTPUT_DIR}/supp_fig/supp4b_rep2_clv_depth.png',
+        f'{OUTPUT_DIR}/supp_fig/supp5a_rep1_clv_eff.png',
+        f'{OUTPUT_DIR}/supp_fig/supp5b_rep2_clv_eff.png',
+        f'{OUTPUT_DIR}/supp_fig/supp6a_psp_clv-eff.pdf',
+        # tables
+        f'{INTERMEDIATE_DIR}/{config["logo_input_dir"]}/TopSeqForLogo_260129v1.xlsx',
+        f'{OUTPUT_DIR}/mapped_clv_seq_full.xlsx',
+    params:
+        config_path = os.path.abspath("config.yaml"),
+    threads: 1
+    script: "generate_plots.py"

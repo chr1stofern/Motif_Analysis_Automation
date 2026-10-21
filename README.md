@@ -4,7 +4,7 @@
 ### Experiment
 In vitro cleavage site mapping using random substrates
 
-Samples involved (Rep1, novaseq70; Rep 2, novaseq85):
+Samples involved (total 22x,  11 for each replicate):
 
 Lbu: No Protein  
 Lbu: Targetting crRNA 
@@ -35,20 +35,20 @@ Dictionary: oKWW2182
 Note that this package is designed to be run on a Linux distribution as the kplogo conda package is only available for linux-64 on the genomedk channel. You may also choose to install kplogo with other methods, but this is not recommended. Alternatively, if you wish to obtain the logos manually using pLogo's web server, you may skip "Setting Up kpLogo" in the "Installation Guide" and refer to the "How to Use" section.
 
 We use conda to manage the installation of kpLogo. If you wish to opt for this route, you may install Conda by running:
-conda install anaconda::conda
-                          
+````conda install anaconda::conda````              
+
 ## Installation Guide
 Clone the repo from github
 
 ### Setting Up Conda Environment:
 Run the following command to create an environment with the necessary dependencies, including kplogo, via conda:
-conda env create -f environment.yaml --solver=libmamba
+````conda env create -f environment.yaml --solver=libmamba````
 (On older versions of Conda where libmamba may not be installed, install it by running the following first:
-conda install conda-forge::conda-libmamba-solver
+````conda install conda-forge::conda-libmamba-solver````
 then create the environment.)
 
 Activate the conda environment with:
-conda activate motif_analysis_env                   
+````conda activate motif_analysis_env````
 
 ## How to Use
 ### Configuring Parameters
@@ -56,7 +56,8 @@ config.yaml
 
 ### Downloading & Naming Samples
 To download the raw NGS data necessary for reproducing figures in our publication, please run the bash script fetch_raw.sh with the syntax:
-./fetch_raw.sh [samples.csv] [raw_dir]
+````./fetch_raw.sh <path/tosamples.csv> <path/to/raw_dir>````
+
 (Be sure to add execution rights before running: chmog +x ./fetch_raw.sh)
 Please ensure your device or server of choice has sufficient storage space. The download process will considerable time. If the process crashed mid-run or some samples failed to download, simply run it again. Files that are already downloaded will be skipped. Please check that a total of 22 files of the extension .fastq.gz are downloaded.
 
@@ -69,10 +70,10 @@ Parameters, including adapter sequences and length, for each sample can be chang
 
 ## Cleanup Guide
 First, deactivate the conda environment:
-conda deactivate
+````conda deactivate````
 
 Then, remove the conda environment:
-conda env remove -n kplogo_env
+````conda env remove -n kplogo_env````
 
 and clear the package cache:
-conda clean --packages --tarballs
+````conda clean --packages --tarballs````
