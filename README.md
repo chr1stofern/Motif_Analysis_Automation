@@ -41,7 +41,11 @@ We also recommend using [uv](https://docs.astral.sh/uv/) for managing python-rel
 ````curl -LsSf https://astral.sh/uv/install.sh | sh```` 
 
 ## Installation Guide
-Clone the repo from github
+Please clone the repository from GitHub to a desired location on your device or server:
+````git clone <repository-url>````
+
+Then, move into the cloned directory:
+````cd <repository-folder>````
 
 ### Setting Up Conda Environment:
 Run the following command to create an environment with the necessary dependencies, including kpLogo, via conda:
@@ -53,26 +57,49 @@ then create the environment.)
 Activate the conda environment with:
 ````conda activate motif_analysis_env````
 
-## How to Use
-### Configuring Parameters
-config.yaml
+### Setting Up UV Environment:
+Simply run:
+````uv sync````
 
-### Downloading & Naming Samples
+## Initial Configuration
+### Configuring Input & Output Directories/Files:
+Please modify the ```config.yaml``` accordingly and confirm the correct paths are provided properly. You may also change the sample names and parameters in ````samples.csv```` if necessary.
+
+### Downloading & Naming Samples:
 To download the raw NGS data necessary for reproducing figures in our publication, please run the bash script fetch_raw.sh with the syntax:
 ````./fetch_raw.sh <path/tosamples.csv> <path/to/raw_dir>````
 
-(Be sure to add execution rights before running: chmog +x ./fetch_raw.sh)
-Please ensure your device or server of choice has sufficient storage space. The download process will considerable time. If the process crashed mid-run or some samples failed to download, simply run it again. Files that are already downloaded will be skipped. Please check that a total of 22 files of the extension .fastq.gz are downloaded.
+(Be sure to add execution rights before running: chmod +x ./fetch_raw.sh)
+The download process will considerable time. If the process crashed mid-run or some samples failed to download, simply run it again. Files that are already downloaded will be skipped. Please check that a total of 22 files of the extension ````.fastq.gz```` are downloaded.
 
 Alternately, you may also download the raw data via the [SRA Explorer](https://sra-explorer.info/#) and search for the accession number GSE313507. Include all 22 files within the series and click "Add to collection". Click on "22 saved datasets" and run the automatically generated download script of your choice.
 
-Please make sure filenames of RAW NGS sequences follow the pattern: {replicate}_{protein}-{type}.fastq.gz, e.g., 1_Lbu-NP.fastq.gz. Note that only read 1 (forward read) is required. 
+### Raw Sequence Processing --- Parameters for Cleavage and Dictionary Type Samples:
+Please make sure filenames of RAW NGS sequences follow the pattern: {replicate}_{protein}-{type}.fastq.gz, e.g., 1_Lbu-NP.fastq.gz. Note that only read 1 (forward read) is required for our data. 
 
-### Parameters for Cleavage and Dictionary Type Samples
 Parameters, including adapter sequences and length, for each sample can be changed in samples.csv. Simply use the csv file provided for reproducing the original figures. You may change the parameters based on your on experiment.
 
+### Scatter Plot Generation:
+If you decide to apply the pipeline on sequences of your choice, please modify the sample importing and exporting logic of ````generate_plots.py```` accordingly, particularly for the ````MOTIF_FIGS```` dictionary, and the sections Supp-Fig-6a and Fig-2f.
+
+### pLogo Generation with kpLogo:
+
+
+### Output Files:
+A total of 3 subdirectories, namely ````main_fig````, ````supp_fig```` and ````motif_plogo````, and one xlsx sheet will be produced. If you choose to use our dataset from GSE313507, there will be 7 files in ```main_fig``` by default, each corresponding to parts of the main figures in the original publication; 6 files in ````supp_fig````, each corresponding to parts of the supplementary figures in the original publication; and 10 files in ````motif_plogo```` corresponding to the motifs of the 5 Cas13 protein tested in two replicates.
+
+## Running the Script
+To run the entire pipeline, execute the following:
+````uv run snakemake --core 30````
+
 ## Cleanup Guide
-First, deactivate the conda environment:
+
+### Removing Intermediate Output & Output Files:
+Simply remove the directories you specified in ````config.yaml```` by running ````rm -rf <dir>````. Alternatively, you may use the automatic clean up rule in snakemake by running:
+````uv run snakemake --cores 4 clean_all```` 
+
+### Removing Environments
+For the Conda environment, deactivate it first:
 ````conda deactivate````
 
 Then, remove the conda environment:
@@ -80,3 +107,9 @@ Then, remove the conda environment:
 
 and clear the package cache:
 ````conda clean --packages --tarballs````
+
+For the UV environment, deactivate with:
+````deactivate````
+
+Then, remove the environment with:
+````rm -rf .venv````

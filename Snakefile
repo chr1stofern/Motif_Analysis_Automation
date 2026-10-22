@@ -17,6 +17,7 @@ os.makedirs(os.path.join(OUTPUT_DIR, "main_fig"), exist_ok=True)
 os.makedirs(os.path.join(OUTPUT_DIR, "supp_fig"), exist_ok=True)
 os.makedirs(os.path.join(INTERMEDIATE_DIR, "logo_input"), exist_ok=True)
 os.makedirs(LOGO_OUTPUT_DIR, exist_ok=True)
+os.makedirs(os.path.join(OUTPUT_DIR, "motif_plogo"), exist_ok=True)
 
 KP_LOGO_ABS = shutil.which("kpLogo")
 if not KP_LOGO_ABS:
@@ -79,6 +80,10 @@ rule all:
         #kpLogo
         expand(os.path.join(LOGO_OUTPUT_DIR,
                             "{replicate}_{protein}/image/{replicate}_{protein}.info.eps"),
+               zip,
+               replicate=[r for (r, p) in KPLOGO_PAIRS],
+               protein=[p for (r, p) in KPLOGO_PAIRS]),
+        expand(f'{OUTPUT_DIR}/motif_plogo/{{replicate}}_{{protein}}.plogo.pdf',
                zip,
                replicate=[r for (r, p) in KPLOGO_PAIRS],
                protein=[p for (r, p) in KPLOGO_PAIRS]),
@@ -246,6 +251,8 @@ rule run_kpLogo:
             cmd.extend(["-max_k", str(params.max_k)])
             cmd.extend(["-minCount", str(params.min_count)])
 
+            # cmd.extend(["-stack_order -1"])
+
             if params.fdr:
                 cmd.append("-FDR")
             else:
@@ -323,3 +330,33 @@ rule run_kpLogo:
             # cleanup
             shutil.rmtree(job_root, ignore_errors=True)
             print(f"Cleaned up: {job_root}")
+
+rule copy_plogo_output:
+    input:
+        expand(os.path.join(LOGO_OUTPUT_DIR,
+                            "{replicate}_{protein}/image/{replicate}_{protein}.plogo.pdf"),
+               zip,
+               replicate=[r for (r, p) in KPLOGO_PAIRS],
+               protein=[p for (r, p) in KPLOGO_PAIRS]),
+    output:
+        expand(f'{OUTPUT_DIR}/motif_plogo/{{replicate}}_{{protein}}.plogo.pdf',
+               zip,
+               replicate=[r for (r, p) in KPLOGO_PAIRS],
+               protein=[p for (r, p) in KPLOGO_PAIRS]),
+    params:
+        src_dir = LOGO_OUTPUT_DIR,
+    threads: 1
+    run:
+        os.makedirs(os.path.join(OUTPUT_DIR, "motif_plogo"), exist_ok=True)
+        for src, dst in zip(input, output):
+            shutil.copy2(src, dst)
+            print(f"copied {src} -> {dst}")
+
+# Remove intermediate_dir and output_dir, and not input_dir
+rule clean_all:
+    shell:
+        r"""
+        rm -rf {INTERMEDIATE_DIR}
+        rm -rf {OUTPUT_DIR}
+        rm -rf logs
+        """

@@ -1,18 +1,22 @@
 # config.yaml
 
 # Input, intermediate output and output directories
+# Please ensure your device or server of choice has sufficient storage space for all of the following directories
 input_dir: "/home/chulfyp1/data/test_download_2"
-#Raw NGS reads should be put in input_dir/
+# raw NGS reads should be downloaded into input_dir/
 
 intermediate_dir: "/home/chulfyp1/data/motif/intermediate_files"
+# intermediate output files will be exported here
 preprocessed_seq_dir: "preprocessed_sequences"
-#preprocessed-seq_dir is located inside intermediate_dir
+# preprocessed-seq_dir is located inside intermediate_dir for storage of preprocessed and collapsed sequences in .tsv format
 output_dir: "/home/chulfyp1/data/motif/output"
+# this stores the final output files
 
+
+
+# Sample names & parameters
 sample_sheet: "/home/chulfyp1/kwonschullab/chulfyp1/Motif_FIN/samples.csv"
-
-# background input
-#bg_file: "EGFP-C1_8nt.txt"
+# change the names and parameters here to your liking
 
 # kpLogo parameters
 max_k: 1
