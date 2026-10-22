@@ -59,7 +59,7 @@ sOutputDir = cfg["output_dir"]
 os.makedirs(sOutputDir, exist_ok=True)
 os.makedirs(os.path.join(sOutputDir, "main_fig"), exist_ok=True)
 os.makedirs(os.path.join(sOutputDir, "supp_fig"), exist_ok=True)
-logo_input_dir = os.path.join(cfg.get("intermediate_dir", "intermediate_files"), cfg.get("logo_input_dir", "logo_input"))
+logo_input_dir = os.path.join(cfg.get("intermediate_dir", "intermediate_files"), "logo_input")
 os.makedirs(logo_input_dir, exist_ok=True)
 
 clv1 = m[(m.replicate == "1") & (m.type != "DT")]
@@ -479,16 +479,20 @@ print(f'wrote {stats_path}')
 # sOutputTopSequences = os.path.join(logo_input_dir, 'Top_4000_Seq.xlsx')
 sOutputMappedClv    = os.path.join(sOutputDir, 'mapped_clv_seq_full.xlsx')
 
-with pd.ExcelWriter(sOutputTopSequences, engine='xlsxwriter') as f1, \
-     pd.ExcelWriter(sOutputMappedClv,    engine='xlsxwriter') as f2:
-
+with pd.ExcelWriter(sOutputMappedClv,    engine='xlsxwriter') as f2:
+# pd.ExcelWriter(sOutputTopSequences, engine='xlsxwriter') as f1, \
     for sLabelRep, sClvName, dfClvConcat in lAllMappedClv:
         sample_key  = _sample_key(sClvName)                 # 'Lbu-CR' / 'Lbu-NP' / 'Dict-DT'
+        
+        if sample_key.endswith('-DT'):
+            continue 
+        
         sOutputName = f'{sLabelRep}-{display_name(sClvName)}'   # 'Rep1-Lbu-withProtein' (xlsx sheet name)
 
         # (1) per-sample .txt for kpLogo: top 4000 8-mers
         #     CR -> foreground for kpLogo; NP -> background for kpLogo; DT -> not used by kpLogo
-        out_txt = os.path.join(logo_input_dir, f'{sLabelRep}_{sample_key}.txt')
+        rep_num = sClvName.split('_', 1)[0]           # '1' or '2'
+        out_txt = os.path.join(logo_input_dir, f'{rep_num}_{sample_key}.txt')
         dfClvConcat.iloc[:nTopNumber, ]['8nt_motif'].to_csv(
             out_txt, index=False, header=False)
 
