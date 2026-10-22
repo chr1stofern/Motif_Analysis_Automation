@@ -476,20 +476,27 @@ print(f'wrote {stats_path}')
 ### Export Entire Mapped Table ###
 ### Write tables (pLogo input + full mapped table) ###
 
-sOutputTopSequences = os.path.join(logo_input_dir, 'TopSeqForLogo_260129v1.xlsx')
+# sOutputTopSequences = os.path.join(logo_input_dir, 'Top_4000_Seq.xlsx')
 sOutputMappedClv    = os.path.join(sOutputDir, 'mapped_clv_seq_full.xlsx')
 
 with pd.ExcelWriter(sOutputTopSequences, engine='xlsxwriter') as f1, \
      pd.ExcelWriter(sOutputMappedClv,    engine='xlsxwriter') as f2:
+
     for sLabelRep, sClvName, dfClvConcat in lAllMappedClv:
-        dfClvConcat['dict_count'] = dfClvConcat['dict_count'].astype(int)
+        sample_key  = _sample_key(sClvName)                 # 'Lbu-CR' / 'Lbu-NP' / 'Dict-DT'
+        sOutputName = f'{sLabelRep}-{display_name(sClvName)}'   # 'Rep1-Lbu-withProtein' (xlsx sheet name)
 
-        sOutputName = f'{sLabelRep}-{display_name(sClvName)}'   # 'Rep1-Lbu-withProtein'
-        print(sOutputName)
+        # (1) per-sample .txt for kpLogo: top 4000 8-mers
+        #     CR -> foreground for kpLogo; NP -> background for kpLogo; DT -> not used by kpLogo
+        out_txt = os.path.join(logo_input_dir, f'{sLabelRep}_{sample_key}.txt')
+        dfClvConcat.iloc[:nTopNumber, ]['8nt_motif'].to_csv(
+            out_txt, index=False, header=False)
 
-        # (1) top sequences for pLogo
-        dfClvConcat.iloc[:nTopNumber, ]['8nt_motif'].to_excel(
-            f1, sheet_name=sOutputName, index=False)
+        # # (2) Top 4000 8-mers per sheet
+        # dfClvConcat.iloc[:nTopNumber, ]['8nt_motif'].to_excel(
+        #     f1, sheet_name=sOutputName, index=False)
 
-        # (2) full mapped table
+        # (3) Full mapped table per sheet
         dfClvConcat.to_excel(f2, sheet_name=sOutputName, index=False)
+
+        print(sOutputName)

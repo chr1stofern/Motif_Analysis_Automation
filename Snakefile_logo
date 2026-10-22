@@ -1,4 +1,3 @@
-#!/usr/local/bin/snakemake
 
 import os
 import glob
@@ -55,7 +54,7 @@ if BG_FILE_ABS:
     print("Using background file: " + BG_FILE_ABS)
 
 def get_kpLogo_path():
-    which_kpLogo = shutil.which(kplogo)
+    which_kpLogo = shutil.which("kpLogo")
     if which_kpLogo:
         return which_kpLogo
     raise Exception("kpLogo not found. Please install according to Installation Guide in the README file")

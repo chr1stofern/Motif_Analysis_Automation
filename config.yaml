@@ -13,7 +13,7 @@ output_dir: "output"
 sample_sheet: "samples.csv"
 
 # background input
-# bg_file: "EGFP-C1_8nt.txt"
+bg_file: "EGFP-C1_8nt.txt"
 
 # kpLogo parameters
 max_k: 1

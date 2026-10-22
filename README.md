@@ -4,7 +4,7 @@
 ### Experiment
 In vitro cleavage site mapping using random substrates
 
-Samples involved (total 22x,  11 for each replicate):
+Samples involved (22 in total, 11 for each replicate):
 
 Lbu: No Protein  
 Lbu: Targetting crRNA 
@@ -32,16 +32,19 @@ Dictionary: oKWW2182
 - generate plogo to visualise significant motifs
 
 ## Prerequisites
-Note that this package is designed to be run on a Linux distribution as the kplogo conda package is only available for linux-64 on the genomedk channel. You may also choose to install kplogo with other methods, but this is not recommended. Alternatively, if you wish to obtain the logos manually using pLogo's web server, you may skip "Setting Up kpLogo" in the "Installation Guide" and refer to the "How to Use" section.
+Note that this package is designed to be run on a Linux distribution as the kpLogo conda package is installed for linux-64 on the genomedk channel. You may also choose to install kpLogo with other methods, but this is not recommended. Alternatively, if you wish to obtain the logos manually using pLogo's [web server](https://plogo.uconn.edu/), you may skip "Setting Up kpLogo" in the "Installation Guide" and refer to the "How to Use" section.
 
-We use conda to manage the installation of kpLogo. If you wish to opt for this route, you may install Conda by running:
-````conda install anaconda::conda````              
+We use conda to manage the installation of kpLogo. If you wish to opt for this route, please refer to [Conda's official installation guide](https://docs.conda.io/projects/conda/en/latest/user-guide/index.html):
+            
+
+We also recommend using [uv](https://docs.astral.sh/uv/) for managing python-related enviroinments. It can be installed by simply running on the terminal:
+````curl -LsSf https://astral.sh/uv/install.sh | sh```` 
 
 ## Installation Guide
 Clone the repo from github
 
 ### Setting Up Conda Environment:
-Run the following command to create an environment with the necessary dependencies, including kplogo, via conda:
+Run the following command to create an environment with the necessary dependencies, including kpLogo, via conda:
 ````conda env create -f environment.yaml --solver=libmamba````
 (On older versions of Conda where libmamba may not be installed, install it by running the following first:
 ````conda install conda-forge::conda-libmamba-solver````
@@ -73,7 +76,7 @@ First, deactivate the conda environment:
 ````conda deactivate````
 
 Then, remove the conda environment:
-````conda env remove -n kplogo_env````
+````conda env remove -n motif_analysis_env````
 
 and clear the package cache:
 ````conda clean --packages --tarballs````

@@ -4,7 +4,7 @@ channels:
   - genomedk
   - bioconda
 dependencies:
-  - genomedk::kplogo
+  - genomedk::kpLogo
   - conda-forge::imagemagick
   - conda-forge::ghostscript
   - bioconda::cutadapt
