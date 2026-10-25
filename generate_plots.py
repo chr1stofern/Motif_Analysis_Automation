@@ -62,57 +62,69 @@ os.makedirs(os.path.join(sOutputDir, "supp_fig"), exist_ok=True)
 logo_input_dir = os.path.join(cfg.get("intermediate_dir", "intermediate_files"), "logo_input")
 os.makedirs(logo_input_dir, exist_ok=True)
 
-clv1 = m[(m.replicate == "1") & (m.type != "DT")]
-clv2 = m[(m.replicate == "2") & (m.type != "DT")]
+### Manifest-derived replication structure ###
+REPS = sorted(m["replicate"].unique())                 # e.g. ['1'] or ['1', '2']
 
-lClvFile1  = clv1["file"].tolist()
-lClvFile2  = clv2["file"].tolist()
-lNames1    = clv1["label"].tolist()
-lNames2    = clv2["label"].tolist()
-sDictFile1 = m[(m.replicate == "1") & (m.type == "DT")]["file"].iloc[0]
-sDictFile2 = m[(m.replicate == "2") & (m.type == "DT")]["file"].iloc[0]
+# per-replicate cleavage sample lists (only replicates that actually have non-DT rows)
+lClvFiles = {rep: m[(m.replicate == rep) & (m.type != "DT")]["file"].tolist()
+             for rep in REPS}
+
+# per-replicate dictionary file (only replicates that have a DT row)
+dict_files = {rep: m[(m.replicate == rep) & (m.type == "DT")]["file"].iloc[0]
+              for rep in REPS
+              if ((m.replicate == rep) & (m.type == "DT")).any()}
+
+print(f"replicates: {REPS}")
+print(f"dictionary files: {dict_files}")
+
+# Rep1 aliases (for backwards-compat with the code below)
+lClvFile1 = lClvFiles.get("1", [])
+lNames1   = [m[(m.replicate == "1") & (m.file == f)]["label"].iloc[0] for f in lClvFile1]
+
+# Rep2 aliases — empty when only 1 replicate
+lClvFile2 = lClvFiles.get("2", [])
+lNames2   = [m[(m.replicate == "2") & (m.file == f)]["label"].iloc[0] for f in lClvFile2]
+
+# Guarded dictionary files — None when the replicate has no dict
+sDictFile1 = dict_files.get("1")
+sDictFile2 = dict_files.get("2")
 
 ### Process Dictionary; Supp-Fig-3a,b | Sequencing Depth of Dictionary ###
+def _load_dict(path, filt):
+    if path is None:
+        return None
+    df = pd.read_table(path, names=['name', 'seq'], index_col=False)
+    df['count'] = df['name'].apply(lambda x: int(x.split('-')[-1]))
+    df = df[df['count'] > filt]
+    return df
 
-dfDict1 = pd.read_table(sDictFile1, names=['name', 'seq'], index_col=False)
-dfDict2 = pd.read_table(sDictFile2, names=['name', 'seq'], index_col=False)
+dfDict1 = _load_dict(sDictFile1, nDictCountFilter1)
+dfDict2 = _load_dict(sDictFile2, nDictCountFilter2)
 
-dfDict1['count'] = dfDict1['name'].apply(lambda x: int(x.split('-')[-1]))
-dfDict2['count'] = dfDict2['name'].apply(lambda x: int(x.split('-')[-1]))
+for label, df, filt in [("Rep1", dfDict1, nDictCountFilter1),
+                        ("Rep2", dfDict2, nDictCountFilter2)]:
+    if df is None:
+        print(f"{label}: no dictionary")
+    else:
+        print(f"{label}: {filt} read filter → "
+              f"{len(df)} unique 35mers, "
+              f"total depth {df['count'].sum()}, "
+              f"median {df['count'].median()}")
 
-print("Printing: dfDict1")
-print(dfDict1)
-print("\n\n\n")
-print("Printing: dfDict2")
-print(dfDict2)
-print("\n\n\n")
+_panels = []
+if dfDict1 is not None:
+    _panels.append((dfDict1, nDictCountFilter1, "Rep1"))
+if dfDict2 is not None:
+    _panels.append((dfDict2, nDictCountFilter2, "Rep2"))
 
-dfDict1 = dfDict1[dfDict1['count'] > nDictCountFilter1]
-dfDict2 = dfDict2[dfDict2['count'] > nDictCountFilter2]
-
-print("Printing: dfDict1")
-print(dfDict1)
-print("\n\n\n")
-print("Printing: dfDict2")
-print(dfDict2)
-print("\n\n\n")
-
-print(f'Dictionary filter rep1: {nDictCountFilter1} reads, '
-      f'{len(dfDict1)} unique 35mers, total depth {dfDict1["count"].sum()}, '
-      f'median {dfDict1["count"].median()}')
-print(f'Dictionary filter rep2: {nDictCountFilter2} reads, '
-      f'{len(dfDict2)} unique 35mers, total depth {dfDict2["count"].sum()}, '
-      f'median {dfDict2["count"].median()}')
-
-fig, axes = plt.subplots(1, 2, figsize=(5, 4))
-for ax, df, filt, title in [
-    (axes[0], dfDict1, nDictCountFilter1, 'Rep1'),
-    (axes[1], dfDict2, nDictCountFilter2, 'Rep2'),
-]:
+fig, axes = plt.subplots(1, len(_panels), figsize=(2.5 * len(_panels), 4),
+                         squeeze=False)
+for ax, (df, filt, title) in zip(axes[0], _panels):
     sns.boxplot(y='count', data=df, ax=ax, width=0.5,
-            flierprops={"marker": "d", "markerfacecolor": "black", "markeredgecolor": "black"})
-    ax.set_title(f'{title}, Dictionary\nunique sequences={len(df):,}\ntotal depth={df["count"].sum():,}',
-                 fontsize=10)
+                flierprops={"marker": "d", "markerfacecolor": "black",
+                            "markeredgecolor": "black"})
+    ax.set_title(f'{title}, Dictionary\nunique sequences={len(df):,}\n'
+                 f'total depth={df["count"].sum():,}', fontsize=10)
     ax.set_ylabel('Number of reads per sequence')
     ax.axhline(y=filt, color='blue', linestyle='--')
     ax.set_ylim([16, 8000])
@@ -161,8 +173,8 @@ def map_replicate(label_rep, clv_files, df_dict,
         mapped.append([label_rep, sClvName, dfClvConcat])
     return mapped
 
-lMappedClv1 = map_replicate('Rep1', lClvFile1, dfDict1)
-lMappedClv2 = map_replicate('Rep2', lClvFile2, dfDict2)
+lMappedClv1 = map_replicate('Rep1', lClvFile1, dfDict1) if dfDict1 is not None and lClvFile1 else []
+lMappedClv2 = map_replicate('Rep2', lClvFile2, dfDict2) if dfDict2 is not None and lClvFile2 else []
 lAllMappedClv = lMappedClv1 + lMappedClv2
 
 def _sample_key(sClvName):
@@ -174,7 +186,7 @@ by_key2 = {_sample_key(n): (rep, n, df) for (rep, n, df) in lMappedClv2}
 
 missing1 = sorted(by_key1.keys() - by_key2.keys())
 missing2 = sorted(by_key2.keys() - by_key1.keys())
-if missing1: print(f'missing in Rep2: {missing1}')
+if missing1: print(f'Rep1-only samples: {missing1}')
 if missing2: print(f'missing in Rep1: {missing2}')
 
 lZipMappedClv = [(by_key1[k], by_key2[k]) for k in sorted(by_key1.keys() & by_key2.keys())]
@@ -209,24 +221,27 @@ plt.close()
 
 ### Supp-Fig-4b | Sequencing Depth of Cleavage Libraries (distribution of reads per sequence; mapped reads on dictionary) — Rep2 ###
 
-fig = plt.figure(figsize=(10, 8))
-for i, (sLabelRep, sClvName, dfClvConcat) in enumerate(lMappedClv2):
-    ax = fig.add_subplot(3, 4, i+1)
-    sns.boxplot(y='clv_count', data=dfClvConcat, ax=ax, width=0.5)
-    ax.set_title(f'{display_name(sClvName)}\nunique sequences={len(dfClvConcat):,}\n'
-                 f'total depth={dfClvConcat["clv_count"].sum():,}',
-                 fontsize=10)
-    ax.set_ylabel('Number of reads per sequence')
-    ax.axhline(y=nClvCountFilter, color='blue', linestyle='--')
-    ax.set_ylim([16, 8000])
-    ax.set_yscale('log', base=2)
-    ax.yaxis.set_major_locator(FixedLocator([16, 64, 256, 1024, 4096]))
-    ax.yaxis.set_major_formatter(ScalarFormatter())
+if lMappedClv2:
+    fig = plt.figure(figsize=(10, 8))
+    for i, (sLabelRep, sClvName, dfClvConcat) in enumerate(lMappedClv2):
+        ax = fig.add_subplot(3, 4, i+1)
+        sns.boxplot(y='clv_count', data=dfClvConcat, ax=ax, width=0.5)
+        ax.set_title(f'{display_name(sClvName)}\nunique sequences={len(dfClvConcat):,}\n'
+                    f'total depth={dfClvConcat["clv_count"].sum():,}',
+                    fontsize=10)
+        ax.set_ylabel('Number of reads per sequence')
+        ax.axhline(y=nClvCountFilter, color='blue', linestyle='--')
+        ax.set_ylim([16, 8000])
+        ax.set_yscale('log', base=2)
+        ax.yaxis.set_major_locator(FixedLocator([16, 64, 256, 1024, 4096]))
+        ax.yaxis.set_major_formatter(ScalarFormatter())
 
-plt.tight_layout()
-plt.suptitle('Rep2', y=0.99)
-plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp4b_rep2_clv_depth.png'), dpi=1200)
-plt.close()
+    plt.tight_layout()
+    plt.suptitle('Rep2', y=0.99)
+    plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp4b_rep2_clv_depth.png'), dpi=1200)
+    plt.close()
+else:
+    print("no Rep2 — skipping Supp-Fig-4b")
 
 ### Supp-Fig-5a | Distribution of relative cleavage efficiencies of cleaved sequences — Rep1 ###
 
@@ -247,66 +262,70 @@ plt.close()
 
 ### Supp-Fig-5b | Distribution of relative cleavage efficiencies of cleaved sequences — Rep2 ###
 
-fig = plt.figure(figsize=(10, 8))
-for i, (sLabelRep, sClvName, dfClvConcat) in enumerate(lMappedClv2):
-    ax = fig.add_subplot(3, 4, i+1)
-    sns.scatterplot(x='rank', y='clvOverDict', data=dfClvConcat,
-                    alpha=1, s=5, color='tab:blue',
-                    edgecolor='tab:blue', linewidth=0.1, ax=ax)
-    ax.set_title(display_name(sClvName))
-    ax.set_ylabel('Relative cleavage efficiency')
-    ax.axvline(x=nTopNumber, color='blue', linestyle='--')
+if lMappedClv2:
+    fig = plt.figure(figsize=(10, 8))
+    for i, (sLabelRep, sClvName, dfClvConcat) in enumerate(lMappedClv2):
+        ax = fig.add_subplot(3, 4, i+1)
+        sns.scatterplot(x='rank', y='clvOverDict', data=dfClvConcat,
+                        alpha=1, s=5, color='tab:blue',
+                        edgecolor='tab:blue', linewidth=0.1, ax=ax)
+        ax.set_title(display_name(sClvName))
+        ax.set_ylabel('Relative cleavage efficiency')
+        ax.axvline(x=nTopNumber, color='blue', linestyle='--')
 
-plt.tight_layout()
-plt.suptitle('Rep2', y=0.99)
-plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp5b_rep2_clv_eff.png'), dpi=1200)
-plt.close()
+    plt.tight_layout()
+    plt.suptitle('Rep2', y=0.99)
+    plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp5b_rep2_clv_eff.png'), dpi=1200)
+    plt.close()
+else:
+    print("no Rep2 — skipping Supp-Fig-5b")
+    
+### Supp-Fig-6a | Cleavage efficiency by rank group — one figure per CR sample ###
 
-### Supp-Fig-6a | Cleavage motifs of PspCas13b - Cleavage Efficiency ###
+S6A_BINS   = cfg["supp6a"]["bins"]
+S6A_LABELS = cfg["supp6a"]["labels"]
+S6A_PALETTE = dict(zip(S6A_LABELS, cfg["supp6a"]["colors"]))
 
-sTargetSampleName = 'Psp-withProtein'
+# one figure per (protein) that has a CR sample — derive from the manifest
+cr_proteins = sorted({row.protein for _, row in m.iterrows() if row.type == "CR"})
 
-bins   = [0, 400, 1600, 4000, float('inf')]
-labels = ['Top400', 'Top401–1600', 'Top1601–4000', 'The rest']   # note en-dash, matches pd.cut below
+for prot in cr_proteins:
+    target_label = f"{prot}-withProtein"
 
-palette = {
-    'Top400':       'tab:blue',
-    'Top401–1600':  'tab:orange',
-    'Top1601–4000': 'tab:green',
-    'The rest':     'tab:red',
-}
+    fig = plt.figure(figsize=(4.5, 6))
+    i = 0
+    for sLabelRep, sClvName, dfClvConcat in lAllMappedClv:
+        if display_name(sClvName) != target_label:
+            continue
+        i += 1
 
-fig = plt.figure(figsize=(4.5, 6))
-i = 0
-for sLabelRep, sClvName, dfClvConcat in lAllMappedClv:
-    if sTargetSampleName != display_name(sClvName):
-        continue
-    i += 1
-    sRepSampleName = f'{sLabelRep}_{display_name(sClvName)}'
+        dfClvConcat = dfClvConcat.copy()                    # don't mutate the cached df
+        dfClvConcat['group'] = pd.cut(dfClvConcat['rank'],
+                                       bins=S6A_BINS,
+                                       labels=S6A_LABELS,
+                                       right=True)
+        counts = dfClvConcat['group'].value_counts()
 
-    dfClvConcat['group'] = pd.cut(dfClvConcat['rank'], bins=bins, labels=labels, right=True)
+        ax = fig.add_subplot(1, 2, i)
+        sns.boxplot(
+            data=dfClvConcat, x='group', y='clvOverDict',
+            hue='group', palette=S6A_PALETTE, legend=False,
+            dodge=False, width=0.5,
+            flierprops={"marker": "d", "markerfacecolor": "black",
+                        "markeredgecolor": "black"},
+            ax=ax,
+        )
+        ax.set_xlabel('')
+        xticklabels = [t.get_text() for t in ax.get_xticklabels()]
+        ax.set_xticks(range(len(xticklabels)))
+        ax.set_xticklabels([f'{lbl} (n={counts[lbl]})' for lbl in xticklabels], rotation=90)
+        ax.set_title(sLabelRep)
+        ax.set_ylabel('Relative cleavage efficiency')
 
-    ax = fig.add_subplot(1, 2, i)
-    counts = dfClvConcat['group'].value_counts()
-
-    sns.boxplot(
-        data=dfClvConcat, x='group', y='clvOverDict',
-        hue='group', palette=palette, legend=False,
-        dodge=False,                                         # ← full-width boxes
-        width=0.5,                                           # ← match Fig-2f
-        flierprops={"marker": "d", "markerfacecolor": "black", "markeredgecolor": "black"},
-        ax=ax,
-    )
-    ax.set_xlabel('') 
-    xticklabels = [t.get_text() for t in ax.get_xticklabels()]
-    ax.set_xticks(range(len(xticklabels)))                                    # ← silences the warning
-    ax.set_xticklabels([f'{lbl} (n={counts[lbl]})' for lbl in xticklabels], rotation=90)
-    ax.set_title(sLabelRep)
-    ax.set_ylabel('Relative cleavage efficiency')
-
-plt.tight_layout(rect=[0, 0, 1, 0.95])
-plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp6a_psp_clv-eff.pdf'), dpi=1200)
-plt.close()
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.savefig(os.path.join(sOutputDir, 'supp_fig',
+                             f'supp6a_{prot}_clv-eff.pdf'), dpi=1200)
+    plt.close()
 
 ### Fig-2c,e | Motif-Cleavage Efficiency Distribution ###
 
@@ -377,101 +396,97 @@ def plot_motif_scatter(mapped_pairs, target, motif_type,
         return
     raise ValueError(f'target {target!r} not found in mapped_pairs')
 
-MOTIF_FIGS = {
-    'Lbu-CR': dict(motif_type='2nt_motif', n_top=5, n_bottom=0,
-                   xlim=[0.1, 0.37], ylim=[0.4, 1.9],
-                   out='fig2c_lbu_motif-clv-eff.pdf', highlight=None),
-    'Lwa-CR': dict(motif_type='2nt_motif', n_top=3, n_bottom=0,
-                   xlim=[0.22, 0.6], ylim=[0.9, 1.9],
-                   out='fig2c_lwa_motif-clv-eff.pdf', highlight='CT'),
-    'Bt3-CR': dict(motif_type='2nt_motif', n_top=1, n_bottom=0,
-                   xlim=[0.2, 0.45], ylim=[0.75, 2.45],
-                   out='fig2c_bt3_motif-clv-eff.pdf', highlight=None),
-    'Rfx-CR': dict(motif_type='2nt_motif', n_top=1, n_bottom=0,
-                   xlim=[0.3, 0.56], ylim=[0.65, 2.9],
-                   out='fig2c_rfx_motif-clv-eff.pdf', highlight=None),
-    'Psp-CR': dict(motif_type='3nt_motif', n_top=7, n_bottom=3,
-                   xlim=[0.15, 0.47], ylim=[0.8, 2.8],
-                   out='fig2e_psp_motif-clv-eff.pdf', highlight=None),
-}
+### Fig-2c / Fig-2e | Motif-Cleavage Efficiency Distribution ###
+
+MOTIF_FIGS = cfg.get("motif_figs") or {}
 
 for target, p in MOTIF_FIGS.items():
     plot_motif_scatter(
         lZipMappedClv, target,
-        motif_type=p['motif_type'],
-        n_top=p['n_top'], n_bottom=p['n_bottom'],
-        xlim=p['xlim'], ylim=p['ylim'],
-        out_path=os.path.join(sOutputDir, 'main_fig', p['out']),
-        highlight_motif=p['highlight'],
+        motif_type      = p["motif_type"],
+        n_top           = p["n_top"],
+        n_bottom        = p["n_bottom"],
+        xlim            = p["xlim"],
+        ylim            = p["ylim"],
+        out_path        = os.path.join(sOutputDir, "main_fig", p["out"]),
+        highlight_motif = p.get("highlight"),           # None if key absent or null
     )
 
-### Fig-2f | PspCas13b Relative Cleavage Efficiency ###
+### Fig-2f | Motif-cleavage efficiency vs reference, for one target sample ###
 
-sTargetSampleName = 'Psp-withProtein'
-lSelectedMotifs   = ['TAT', 'TCA', 'CAA', 'GTT']
+f2f = cfg.get("fig2f")
 
-stats_rows = []   # ← add: accumulate Mann-Whitney results
+if f2f:
+    sTargetSampleName = f2f["target"]
+    lSelectedMotifs   = f2f["motifs"]
+    reference_motif   = f2f["reference"]
 
-fig = plt.figure(figsize=(4.5, 6))
-i = 0
-for sLabelRep, sClvName, dfClvConcat in lAllMappedClv:
-    if sTargetSampleName != display_name(sClvName):
-        continue
-    i += 1
-    sRepSampleName = f'{sLabelRep}_{display_name(sClvName)}'
+    stats_rows = []
 
-    filtered_dfClvConcat = dfClvConcat[dfClvConcat['3nt_motif'].isin(lSelectedMotifs)]
+    fig = plt.figure(figsize=(4.5, 6))
+    i = 0
+    for sLabelRep, sClvName, dfClvConcat in lAllMappedClv:
+        if sTargetSampleName != display_name(sClvName):
+            continue
+        i += 1
+        sRepSampleName = f'{sLabelRep}_{display_name(sClvName)}'
 
-    group_stats = filtered_dfClvConcat.groupby('3nt_motif')['clvOverDict'].agg(['mean', 'count']).reset_index()
-    group_stats['label'] = group_stats.apply(
-        lambda row: f"{row['3nt_motif']} (n={row['count']})", axis=1
-    )
-    group_stats_sorted = group_stats.sort_values('mean', ascending=False)
-    ordered_motifs     = group_stats_sorted['3nt_motif'].tolist()
-    label_map          = dict(zip(group_stats_sorted['3nt_motif'], group_stats_sorted['label']))
+        filtered_dfClvConcat = dfClvConcat[dfClvConcat['3nt_motif'].isin(lSelectedMotifs)]
 
-    ax = fig.add_subplot(1, 2, i)
-    sns.boxplot(data=filtered_dfClvConcat, y='clvOverDict', x='3nt_motif',
-                order=ordered_motifs, color='#edc47e', width=0.5, showfliers=False, ax=ax)
-    sns.despine(ax=ax)
-    ax.set_xticks(range(len(ordered_motifs)))
-    ax.set_xticklabels([label_map[m] for m in ordered_motifs], rotation=90)
-    ax.set_title(sLabelRep)
-    ax.set_ylabel('Relative cleavage efficiency')
+        group_stats = filtered_dfClvConcat.groupby('3nt_motif')['clvOverDict'].agg(['mean', 'count']).reset_index()
+        group_stats['label'] = group_stats.apply(
+            lambda row: f"{row['3nt_motif']} (n={row['count']})", axis=1
+        )
+        group_stats_sorted = group_stats.sort_values('mean', ascending=False)
+        ordered_motifs     = group_stats_sorted['3nt_motif'].tolist()
+        label_map          = dict(zip(group_stats_sorted['3nt_motif'], group_stats_sorted['label']))
 
-    if sLabelRep == 'Rep1':
-        ax.set_ylim([0, 1])
-    elif sLabelRep == 'Rep2':
-        ax.set_ylim([0, 6])
+        ax = fig.add_subplot(1, 2, i)
+        sns.boxplot(data=filtered_dfClvConcat, y='clvOverDict', x='3nt_motif',
+                    order=ordered_motifs, color='#edc47e', width=0.5, showfliers=False, ax=ax)
+        sns.despine(ax=ax)
+        ax.set_xticks(range(len(ordered_motifs)))
+        ax.set_xticklabels([label_map[m] for m in ordered_motifs], rotation=90)
+        ax.set_title(sLabelRep)
+        ax.set_ylabel('Relative cleavage efficiency')
 
-    groupTAT = filtered_dfClvConcat[filtered_dfClvConcat['3nt_motif'] == 'TAT']['clvOverDict']
-    groupTCA = filtered_dfClvConcat[filtered_dfClvConcat['3nt_motif'] == 'TCA']['clvOverDict']
-    groupCAA = filtered_dfClvConcat[filtered_dfClvConcat['3nt_motif'] == 'CAA']['clvOverDict']
-    groupGTT = filtered_dfClvConcat[filtered_dfClvConcat['3nt_motif'] == 'GTT']['clvOverDict']
+        if sLabelRep == 'Rep1':
+            ax.set_ylim(f2f["rep1_ylim"])
+        elif sLabelRep == 'Rep2':
+            ax.set_ylim(f2f["rep2_ylim"])
 
-    groups = {'TAT': groupTAT, 'TCA': groupTCA, 'CAA': groupCAA, 'GTT': groupGTT}
+        groups = {motif: filtered_dfClvConcat[filtered_dfClvConcat['3nt_motif'] == motif]['clvOverDict']
+                for motif in lSelectedMotifs}
 
-    for motif in ['TAT', 'TCA', 'CAA']:
-        p = mannwhitneyu(groups[motif], groups['GTT'], alternative='two-sided').pvalue
-        print(f'{sLabelRep} {motif} vs. GTT, Mann-Whitney-U, p-value: {p:,}')
-        stats_rows.append(dict(
-            replicate   = sLabelRep,
-            sample      = display_name(sClvName),
-            comparison  = f'{motif}_vs_GTT',
-            n_motif     = len(groups[motif]),
-            n_gtt       = len(groups['GTT']),
-            p_value     = p,
-        ))
-ax.set_xlabel('')
-plt.tight_layout(rect=[0, 0, 1, 0.95])
-plt.savefig(os.path.join(sOutputDir, 'main_fig', 'fig2f_psp_clv-eff.pdf'), dpi=1200)
-plt.close()
+        for motif in lSelectedMotifs:
+            if motif == reference_motif:
+                continue
+            p = mannwhitneyu(groups[motif], groups[reference_motif],
+                            alternative='two-sided').pvalue
+            print(f'{sLabelRep} {motif} vs. {reference_motif}, '
+                f'Mann-Whitney-U, p-value: {p:,}')
+            stats_rows.append(dict(
+                replicate   = sLabelRep,
+                sample      = display_name(sClvName),
+                comparison  = f'{motif}_vs_{reference_motif}',
+                n_motif     = len(groups[motif]),
+                n_reference = len(groups[reference_motif]),
+                p_value     = p,
+            ))
 
-# export mann whitney test data
-stats_path = os.path.join(sOutputDir, 'main_fig', 'fig2_psp_mann-whitney.tsv')
-pd.DataFrame(stats_rows).to_csv(stats_path, sep='\t', index=False)
-print(f'wrote {stats_path}')
+    ax.set_xlabel('')
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.savefig(os.path.join(sOutputDir, 'main_fig', f2f["out"]), dpi=1200)
+    plt.close()
 
+    # export mann whitney test data
+
+    stats_path = os.path.join(sOutputDir, 'main_fig', f2f["stats_out"])
+    pd.DataFrame(stats_rows).to_csv(stats_path, sep='\t', index=False)
+    print(f'wrote {stats_path}')
+else:
+    print("fig2f is null; skipping Fig-2f")
+    
 ### Generate pLogo/kpLogo Foreground Input Sequences (Top 4000) ###
 ### Export Entire Mapped Table ###
 ### Write tables (pLogo input + full mapped table) ###

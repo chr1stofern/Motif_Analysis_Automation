@@ -74,6 +74,8 @@ The download process will considerable time. If the process crashed mid-run or s
 
 Alternately, you may also download the raw data via the [SRA Explorer](https://sra-explorer.info/#) and search for the accession number GSE313507. Include all 22 files within the series and click "Add to collection". Click on "22 saved datasets" and run the automatically generated download script of your choice.
 
+Note that the script supports 1-2 replicates. To process more than 2 replicates, you may either edit the internal code, or simply repeat the process and specify a different set of samples to run (save the previous outputs first before re-running).
+
 ### Raw Sequence Processing --- Parameters for Cleavage and Dictionary Type Samples:
 Please make sure filenames of RAW NGS sequences follow the pattern: {replicate}_{protein}-{type}.fastq.gz, e.g., 1_Lbu-NP.fastq.gz. Note that only read 1 (forward read) is required for our data. 
 

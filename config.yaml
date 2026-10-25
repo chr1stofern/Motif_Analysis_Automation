@@ -3,19 +3,23 @@
 # Input, intermediate output and output directories
 # Please ensure your device or server of choice has sufficient storage space for all of the following directories
 input_dir: "/home/chulfyp1/data/test_download_2"
+# input_dir: "/home/chulfyp1/data/Motif_Analysis_Automation/example_seq"
 # raw NGS reads should be downloaded into input_dir/
 
 intermediate_dir: "/home/chulfyp1/data/motif/intermediate_files"
+# intermediate_dir: "/home/chulfyp1/data/motif_example/intermediate_files"
 # intermediate output files will be exported here
 preprocessed_seq_dir: "preprocessed_sequences"
 # preprocessed-seq_dir is located inside intermediate_dir for storage of preprocessed and collapsed sequences in .tsv format
 output_dir: "/home/chulfyp1/data/motif/output"
+# output_dir: "/home/chulfyp1/data/motif_example/output"
 # this stores the final output files
 
 
 
 # Sample names & parameters
-sample_sheet: "/home/chulfyp1/kwonschullab/chulfyp1/Motif_FIN/samples.csv"
+sample_sheet: "/home/chulfyp1/data/Motif_Analysis_Automation/samples.csv"
+# sample_sheet: "/home/chulfyp1/data/Motif_Analysis_Automation/examples.csv"
 # change the names and parameters here to your liking
 
 # kpLogo parameters
@@ -28,3 +32,76 @@ region: null
 weighted: false
 ranked: false
 extra_args: "-plot s -stack_order 1 -fix 1.1 -pseudo 2.5"
+
+
+# ---- Supp-Fig-6a: rank-group cleavage efficiency, one figure per CR sample ----
+# The loop below produces one figure per protein with a `-CR` sample in samples.csv.
+# The bins/labels/palette are fixed analysis choices (edit the .py to change them).
+supp6a:
+  bins:   [0, 400, 1600, 4000, .inf]      # YAML parses '.inf' as float('inf')
+  labels: ["Top400", "Top401–1600", "Top1601–4000", "The rest"]
+  # colours are chosen in the .py from this list, in the same order as `labels`
+  colors: ["tab:blue", "tab:orange", "tab:green", "tab:red"]
+
+# ---- Fig-2f: motif boxplot + Mann-Whitney vs reference, for one target sample ----
+fig2f:
+  target:     "Psp-withProtein"
+  motifs:     ["TAT", "TCA", "CAA", "GTT"]
+  reference:  "GTT"
+  rep1_ylim:  [0, 1]
+  rep2_ylim:  [0, 6]
+  out:        "fig2f_psp_clv-eff.pdf"
+  stats_out:  "fig2_psp_mann-whitney.tsv"
+fig2f: null
+
+# ---- Fig-2c / Fig-2e: per-sample motif-scatter recipes ----
+# One entry per (protein)-CR sample. `out` filenames must match the Snakefile's rule-all list.
+motif_figs:
+  Lbu-CR:
+    motif_type: 2nt_motif
+    n_top: 5
+    n_bottom: 0
+    xlim: [0.1, 0.37]
+    ylim: [0.4, 1.9]
+    out: fig2c_lbu_motif-clv-eff.pdf
+    highlight: null
+  Lwa-CR:
+    motif_type: 2nt_motif
+    n_top: 3
+    n_bottom: 0
+    xlim: [0.22, 0.6]
+    ylim: [0.9, 1.9]
+    out: fig2c_lwa_motif-clv-eff.pdf
+    highlight: "CT"
+  Bt3-CR:
+    motif_type: 2nt_motif
+    n_top: 1
+    n_bottom: 0
+    xlim: [0.2, 0.45]
+    ylim: [0.75, 2.45]
+    out: fig2c_bt3_motif-clv-eff.pdf
+    highlight: null
+  Rfx-CR:
+    motif_type: 2nt_motif
+    n_top: 1
+    n_bottom: 0
+    xlim: [0.3, 0.56]
+    ylim: [0.65, 2.9]
+    out: fig2c_rfx_motif-clv-eff.pdf
+    highlight: null
+  Psp-CR:
+    motif_type: 3nt_motif
+    n_top: 7
+    n_bottom: 3
+    xlim: [0.15, 0.47]
+    ylim: [0.8, 2.8]
+    out: fig2e_psp_motif-clv-eff.pdf
+    highlight: null
+  # Example-CR:
+  #   motif_type: 3nt_motif
+  #   n_top: 7
+  #   n_bottom: 3
+  #   xlim: [0.15, 0.47]
+  #   ylim: [0.8, 2.8]
+  #   out: fig2e_example_motif-clv-eff.pdf
+  #   highlight: null
