@@ -38,13 +38,13 @@ _cr_proteins = sorted({p for (r, p, t) in PAIRS if t == "CR"})
 _has_rep2 = any(r == "2" for (r, _, _) in PAIRS)
 
 REP_FIGS = [
-    f'{OUTPUT_DIR}/supp_fig/supp4a_rep1_clv_depth.png',
-    f'{OUTPUT_DIR}/supp_fig/supp5a_rep1_clv_eff.png',
+    f'{OUTPUT_DIR}/supp_fig/supp4a_rep1_clv_depth.pdf',
+    f'{OUTPUT_DIR}/supp_fig/supp5a_rep1_clv_eff.pdf',
 ]
 if _has_rep2:
     REP_FIGS += [
-        f'{OUTPUT_DIR}/supp_fig/supp4b_rep2_clv_depth.png',
-        f'{OUTPUT_DIR}/supp_fig/supp5b_rep2_clv_eff.png',
+        f'{OUTPUT_DIR}/supp_fig/supp4b_rep2_clv_depth.pdf',
+        f'{OUTPUT_DIR}/supp_fig/supp5b_rep2_clv_eff.pdf',
     ]
 
 SUPP6A_OUTS = [
@@ -87,7 +87,7 @@ rule all:
                type=[t for (_, _, t) in PAIRS]),
 
         # per-replicate depth / efficiency figures (unchanged)
-        f'{OUTPUT_DIR}/supp_fig/supp3ab_dict_depth.png',
+        f'{OUTPUT_DIR}/supp_fig/supp3ab_dict_depth.pdf',
         *REP_FIGS,
         # plogo PDFs
         expand(f'{OUTPUT_DIR}/motif_plogo/{{replicate}}_{{protein}}.plogo.pdf',
@@ -167,7 +167,7 @@ rule generate_plots:
                type=[t for (_, _, t) in PAIRS]),
         config["sample_sheet"],
     output:
-        f'{OUTPUT_DIR}/supp_fig/supp3ab_dict_depth.png',
+        f'{OUTPUT_DIR}/supp_fig/supp3ab_dict_depth.pdf',
         *REP_FIGS,
         SUPP6A_OUTS,
         MOTIF_OUTS,

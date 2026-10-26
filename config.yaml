@@ -15,12 +15,27 @@ output_dir: "/home/chulfyp1/data/motif/output"
 # output_dir: "/home/chulfyp1/data/motif_example/output"
 # this stores the final output files
 
-
-
 # Sample names & parameters
 sample_sheet: "/home/chulfyp1/data/Motif_Analysis_Automation/samples.csv"
 # sample_sheet: "/home/chulfyp1/data/Motif_Analysis_Automation/examples.csv"
 # change the names and parameters here to your liking
+
+# Motif analysis parameters
+# dictionary count filters
+# actual samples:
+dict_min_count_rep1: 100
+dict_min_count_rep2: 50
+# example sequence (uncomment the following two lines):
+# dict_min_count_rep1: 1
+# dict_min_count_rep2: 1
+
+# cleavage count filters
+# actual samples:
+clv_min_count_rep1: 20
+clv_min_count_rep2: 20
+# example sequence (uncomment the following two lines):
+# dict_min_count_rep1: 1
+# dict_min_count_rep2: 1
 
 # kpLogo parameters
 max_k: 1
@@ -52,10 +67,11 @@ fig2f:
   rep2_ylim:  [0, 6]
   out:        "fig2f_psp_clv-eff.pdf"
   stats_out:  "fig2_psp_mann-whitney.tsv"
-fig2f: null
+# fig2f: null
 
 # ---- Fig-2c / Fig-2e: per-sample motif-scatter recipes ----
 # One entry per (protein)-CR sample. `out` filenames must match the Snakefile's rule-all list.
+# plot compares 2 replicates, please comment out if only 1 replicate is involved
 motif_figs:
   Lbu-CR:
     motif_type: 2nt_motif

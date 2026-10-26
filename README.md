@@ -66,6 +66,10 @@ Simply run:
 Please modify the ```config.yaml``` accordingly and confirm the correct paths are provided properly. You may also change the sample names and parameters in ````samples.csv```` if necessary.
 
 ### Downloading & Naming Samples:
+This package can be used in one of 3 ways: with example (toy) sequences, with raw sequences from which we produced the figures for our previous publication, and with your own data.
+
+The example sequences are already included in the repository, and are obtained by running the command ````seqtk sample -s 111 {RAW_SEQ.fastq.gz} 50000 | gzip -c > {EXAMPLE.fastq.gz}```` on replicate 1 PspCas13b and dictionary sequences.
+
 To download the raw NGS data necessary for reproducing figures in our publication, please run the bash script fetch_raw.sh with the syntax:
 ````./fetch_raw.sh <path/tosamples.csv> <path/to/raw_dir>````
 

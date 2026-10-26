@@ -19,14 +19,6 @@ mpl.rcParams['pdf.fonttype'] = 42
 # mpl.rcParams['axes.titleweight'] = 'bold'
 # mpl.rcParams['axes.labelweight'] = 'bold'
 
-# Analysis constants
-nDictCountFilter1 = 100
-nDictCountFilter2 = 50
-nClvCountFilter   = 20
-nMinInsertLen     = 15
-nMaxInsertLen     = 25
-nTopNumber        = 4000
-
 def load_config(path="config.yaml"):
     with open(path) as f:
         return yaml.safe_load(f)
@@ -52,6 +44,15 @@ try:
 except NameError:
     cfg_path = "config.yaml"                     # when run as `python generate_plots.py`
 cfg = load_config(cfg_path)
+
+# Analysis constants
+nDictCountFilter1 = cfg.get("dict_min_count_rep1", 100)
+nDictCountFilter2 = cfg.get("dict_min_count_rep2", 50)
+nClvCountFilter1  = cfg.get("clv_min_count_rep1", 20)
+nClvCountFilter2  = cfg.get("clv_min_count_rep2", 20)
+nMinInsertLen     = 15
+nMaxInsertLen     = 25
+nTopNumber        = 4000
 
 m   = load_manifest(cfg)
 
@@ -133,13 +134,13 @@ for ax, (df, filt, title) in zip(axes[0], _panels):
     ax.yaxis.set_major_formatter(ScalarFormatter())
 
 plt.tight_layout()
-plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp3ab_dict_depth.png'), dpi=1200)
+plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp3ab_dict_depth.pdf'), dpi=1200)
 plt.close()
 
 ### Map Cleavage Fragments to Dictionary ###
 
 def map_replicate(label_rep, clv_files, df_dict,
-                  n_clv_count_filter=nClvCountFilter,
+                  n_clv_count_filter,
                   min_insert_len=nMinInsertLen, max_insert_len=nMaxInsertLen):
     mapped = []
     for sClvFile in clv_files:
@@ -173,9 +174,11 @@ def map_replicate(label_rep, clv_files, df_dict,
         mapped.append([label_rep, sClvName, dfClvConcat])
     return mapped
 
-lMappedClv1 = map_replicate('Rep1', lClvFile1, dfDict1) if dfDict1 is not None and lClvFile1 else []
-lMappedClv2 = map_replicate('Rep2', lClvFile2, dfDict2) if dfDict2 is not None and lClvFile2 else []
-lAllMappedClv = lMappedClv1 + lMappedClv2
+lMappedClv1 = (map_replicate('Rep1', lClvFile1, dfDict1, nClvCountFilter1)
+               if dfDict1 is not None and lClvFile1 else [])
+lMappedClv2 = (map_replicate('Rep2', lClvFile2, dfDict2, nClvCountFilter2)
+               if dfDict2 is not None and lClvFile2 else [])
+lAllMappedClv = lMappedClv1 + lMappedClv2 
 
 def _sample_key(sClvName):
     # '1_Lbu-NP' -> 'Lbu-NP'
@@ -208,7 +211,7 @@ for i, (sLabelRep, sClvName, dfClvConcat) in enumerate(lMappedClv1):
                  f'total depth={dfClvConcat["clv_count"].sum():,}',
                  fontsize=10)
     ax.set_ylabel('Number of reads per sequence')
-    ax.axhline(y=nClvCountFilter, color='blue', linestyle='--')
+    ax.axhline(y=nClvCountFilter1, color='blue', linestyle='--')
     ax.set_ylim([16, 8000])
     ax.set_yscale('log', base=2)
     ax.yaxis.set_major_locator(FixedLocator([16, 64, 256, 1024, 4096]))
@@ -216,7 +219,7 @@ for i, (sLabelRep, sClvName, dfClvConcat) in enumerate(lMappedClv1):
 
 plt.tight_layout()
 plt.suptitle('Rep1', y=0.99)
-plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp4a_rep1_clv_depth.png'), dpi=1200)
+plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp4a_rep1_clv_depth.pdf'), dpi=1200)
 plt.close()
 
 ### Supp-Fig-4b | Sequencing Depth of Cleavage Libraries (distribution of reads per sequence; mapped reads on dictionary) — Rep2 ###
@@ -230,7 +233,7 @@ if lMappedClv2:
                     f'total depth={dfClvConcat["clv_count"].sum():,}',
                     fontsize=10)
         ax.set_ylabel('Number of reads per sequence')
-        ax.axhline(y=nClvCountFilter, color='blue', linestyle='--')
+        ax.axhline(y=nClvCountFilter2, color='blue', linestyle='--')
         ax.set_ylim([16, 8000])
         ax.set_yscale('log', base=2)
         ax.yaxis.set_major_locator(FixedLocator([16, 64, 256, 1024, 4096]))
@@ -238,7 +241,7 @@ if lMappedClv2:
 
     plt.tight_layout()
     plt.suptitle('Rep2', y=0.99)
-    plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp4b_rep2_clv_depth.png'), dpi=1200)
+    plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp4b_rep2_clv_depth.pdf'), dpi=1200)
     plt.close()
 else:
     print("no Rep2 — skipping Supp-Fig-4b")
@@ -257,7 +260,7 @@ for i, (sLabelRep, sClvName, dfClvConcat) in enumerate(lMappedClv1):
 
 plt.tight_layout()
 plt.suptitle('Rep1', y=0.99)
-plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp5a_rep1_clv_eff.png'), dpi=1200)
+plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp5a_rep1_clv_eff.pdf'), dpi=1200)
 plt.close()
 
 ### Supp-Fig-5b | Distribution of relative cleavage efficiencies of cleaved sequences — Rep2 ###
@@ -275,7 +278,7 @@ if lMappedClv2:
 
     plt.tight_layout()
     plt.suptitle('Rep2', y=0.99)
-    plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp5b_rep2_clv_eff.png'), dpi=1200)
+    plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp5b_rep2_clv_eff.pdf'), dpi=1200)
     plt.close()
 else:
     print("no Rep2 — skipping Supp-Fig-5b")
