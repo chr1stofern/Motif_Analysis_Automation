@@ -65,7 +65,7 @@ Simply run:
 ### Configuring Input & Output Directories/Files:
 Please modify the ```config.yaml``` accordingly and confirm the correct paths are provided properly. You may also change the sample names and parameters in ````samples.csv```` if necessary.
 
-### Downloading & Naming Samples:
+### Downloading Samples:
 This package can be used in one of 3 ways: with example (toy) sequences, with raw sequences from which we produced the figures for our previous publication, and with your own data.
 
 The example sequences are already included in the repository, and are obtained by running the command ````seqtk sample -s 111 {RAW_SEQ.fastq.gz} 50000 | gzip -c > {EXAMPLE.fastq.gz}```` on replicate 1 PspCas13b and dictionary sequences.
@@ -79,6 +79,10 @@ The download process will considerable time. If the process crashed mid-run or s
 Alternately, you may also download the raw data via the [SRA Explorer](https://sra-explorer.info/#) and search for the accession number GSE313507. Include all 22 files within the series and click "Add to collection". Click on "22 saved datasets" and run the automatically generated download script of your choice.
 
 Note that the script supports 1-2 replicates. To process more than 2 replicates, you may either edit the internal code, or simply repeat the process and specify a different set of samples to run (save the previous outputs first before re-running).
+
+### Naming Samples
+If you choose to use the toy sequences or the .sh downlaod script, the downloaded files will already be in the correct naming format. If you choose to use your own data, please make surr your files match the following format:
+````{rep#}_{sample/protein name}-{type: CR (crRNA and protein added), or NP (no protein), or DT (dictionary)}.fastq.gz````. For example, for a crRNA added PspCas13b conducted in replicate 1, it shall be named 1_Psp-CR.fastq.gz (_{sample/protein name} can be changed to any string of your liking); for a dictionary conducted in replicate 2, it shall be named 2_Dict-DT.fastq.gz (again, "Dict" can be changed to other strings).
 
 ### Raw Sequence Processing --- Parameters for Cleavage and Dictionary Type Samples:
 Please make sure filenames of RAW NGS sequences follow the pattern: {replicate}_{protein}-{type}.fastq.gz, e.g., 1_Lbu-NP.fastq.gz. Note that only read 1 (forward read) is required for our data. 
