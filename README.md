@@ -2,9 +2,7 @@
 
 ## Overview
 ### Experiment
-In vitro cleavage site mapping using random substrates
-
-Samples involved (22 in total, 11 for each replicate):
+In our previous publication, we mapped the in vitro cleavage sites of various Cas13 proteins using random substrates. In total, 22 samples/sequencing files (11 for each of two replicate) were obtained for downstream analysis. The samples for each replicate are as follows:
 
 Lbu: No Protein  
 Lbu: Targetting crRNA 
@@ -32,7 +30,7 @@ Dictionary: oKWW2182
 - generate plogo to visualise significant motifs
 
 ## Prerequisites
-Note that this package is designed to be run on a Linux distribution as the kpLogo conda package is installed for linux-64 on the genomedk channel. You may also choose to install kpLogo with other methods, but this is not recommended. Alternatively, if you wish to obtain the logos manually using pLogo's [web server](https://plogo.uconn.edu/), you may skip "Setting Up kpLogo" in the "Installation Guide" and refer to the "How to Use" section.
+Note that this package is designed to be run on a Linux distribution as the kpLogo conda package is installed for linux-64 on the genomedk channel. You may also choose to install kpLogo with other methods, but this is not recommended. Alternatively, if you wish to obtain the logos manually using pLogo's [web server](https://plogo.uconn.edu/), you may refer to the "pLogo Generation with pLogo Web Page" section.
 
 We use conda to manage the installation of kpLogo. If you wish to opt for this route, please refer to [Conda's official installation guide](https://docs.conda.io/projects/conda/en/latest/user-guide/index.html):
             
@@ -65,34 +63,35 @@ Simply run:
 ### Configuring Input & Output Directories/Files:
 Please modify the ```config.yaml``` accordingly and confirm the correct paths are provided properly. You may also change the sample names and parameters in ````samples.csv```` if necessary.
 
-### Downloading Samples:
+### Setting Up Samples:
 This package can be used in one of 3 ways: with example (toy) sequences, with raw sequences from which we produced the figures for our previous publication, and with your own data.
 
-The example sequences are already included in the repository, and are obtained by running the command ````seqtk sample -s 111 {RAW_SEQ.fastq.gz} 50000 | gzip -c > {EXAMPLE.fastq.gz}```` on replicate 1 PspCas13b and dictionary sequences.
+The example sequences are already included in the repository, and are obtained by running the command ````awk 'NR % 10 == 0' {ORIGINAL_SEQ.collapsed.tsv} > {EXAMPLE_SEQ.collapsed.tsv}```` on RfxCas13d and dictionary sequences.
 
-To download the raw NGS data necessary for reproducing figures in our publication, please run the bash script fetch_raw.sh with the syntax:
-````./fetch_raw.sh <path/tosamples.csv> <path/to/raw_dir>````
+To download the raw NGS data necessary for reproducing figures in our publication, please add execution rights to the download script by running: ````chmod +x ./fetch_raw.sh````, then run the bash script fetch_raw.sh with the syntax:
+````./fetch_raw.sh {path/tosamples.csv} {path/to/raw_dir}````
 
-(Be sure to add execution rights before running: chmod +x ./fetch_raw.sh)
 The download process will considerable time. If the process crashed mid-run or some samples failed to download, simply run it again. Files that are already downloaded will be skipped. Please check that a total of 22 files of the extension ````.fastq.gz```` are downloaded.
 
-Alternately, you may also download the raw data via the [SRA Explorer](https://sra-explorer.info/#) and search for the accession number GSE313507. Include all 22 files within the series and click "Add to collection". Click on "22 saved datasets" and run the automatically generated download script of your choice.
+Alternately, you may also download the raw data via the [SRA Explorer](https://sra-explorer.info/#) and search for the accession number GSE313507. Include all 22 files within the series and click "Add to collection". Click on "22 saved datasets" and run the automatically generated download script of your choice. A total of 44 sequence files will be downloaded, since each sample produces two reads (read 1/forward read, and read 2/reverse read). Note that only read 1 (forward read) is required for our analysis. 
 
 Note that the script supports 1-2 replicates. To process more than 2 replicates, you may either edit the internal code, or simply repeat the process and specify a different set of samples to run (save the previous outputs first before re-running).
 
 ### Naming Samples
-If you choose to use the toy sequences or the .sh downlaod script, the downloaded files will already be in the correct naming format. If you choose to use your own data, please make surr your files match the following format:
-````{rep#}_{sample/protein name}-{type: CR (crRNA and protein added), or NP (no protein), or DT (dictionary)}.fastq.gz````. For example, for a crRNA added PspCas13b conducted in replicate 1, it shall be named 1_Psp-CR.fastq.gz (_{sample/protein name} can be changed to any string of your liking); for a dictionary conducted in replicate 2, it shall be named 2_Dict-DT.fastq.gz (again, "Dict" can be changed to other strings).
+If you choose to use the toy sequences or the .sh downlaod script, the downloaded files will already be in the correct naming format. If you choose to use your own data, please make sure your files match the following format:
+````{rep#}_{sample/protein name}-{type: CR (crRNA and protein added), or NP (no protein), or DT (dictionary)}.fastq.gz````. For example, for a crRNA added PspCas13b conducted in replicate 1, it shall be named 1_Psp-CR.fastq.gz ({sample/protein name} can be changed to any string of your liking, but must not include "-" or "_"); for a dictionary conducted in replicate 2, it shall be named 2_Dict-DT.fastq.gz (again, "Dict" can be changed to other strings except "-" and "_").
 
 ### Raw Sequence Processing --- Parameters for Cleavage and Dictionary Type Samples:
-Please make sure filenames of RAW NGS sequences follow the pattern: {replicate}_{protein}-{type}.fastq.gz, e.g., 1_Lbu-NP.fastq.gz. Note that only read 1 (forward read) is required for our data. 
+Please make sure filenames of RAW NGS sequences follow the pattern: {replicate}_{protein}-{type}.fastq.gz, e.g., 1_Lbu-NP.fastq.gz.
 
 Parameters, including adapter sequences and length, for each sample can be changed in samples.csv. Simply use the csv file provided for reproducing the original figures. You may change the parameters based on your on experiment.
 
 ### Scatter Plot Generation:
 If you decide to apply the pipeline on sequences of your choice, please modify the sample importing and exporting logic of ````generate_plots.py```` accordingly, particularly for the ````MOTIF_FIGS```` dictionary, and the sections Supp-Fig-6a and Fig-2f.
 
-### pLogo Generation with kpLogo:
+### pLogo Generation with kpLogo Package:
+
+### pLogo Generation with pLogo Web Page:
 
 
 ### Output Files:
@@ -103,7 +102,6 @@ To run the entire pipeline, execute the following:
 ````uv run snakemake --core 30````
 
 ## Cleanup Guide
-
 ### Removing Intermediate Output & Output Files:
 Simply remove the directories you specified in ````config.yaml```` by running ````rm -rf <dir>````. Alternatively, you may use the automatic clean up rule in snakemake by running:
 ````uv run snakemake --cores 4 clean_all```` 
