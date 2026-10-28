@@ -10,7 +10,7 @@ INTERMEDIATE_DIR = config.get("intermediate_dir", "intermediate_files")
 PPSEQ_DIR = os.path.join(INTERMEDIATE_DIR, config.get("preprocessed_seq_dir", "preprocessed_sequences"))
 OUTPUT_DIR = config["output_dir"]
 LOGO_OUTPUT_DIR = os.path.join(INTERMEDIATE_DIR, "logo_output")
-os.makedirs(PPSEQ_DIR,        exist_ok=True)
+os.makedirs(PPSEQ_DIR, exist_ok=True)
 os.makedirs(INTERMEDIATE_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(os.path.join(OUTPUT_DIR, "main_fig"), exist_ok=True)
@@ -21,7 +21,7 @@ os.makedirs(os.path.join(OUTPUT_DIR, "motif_plogo"), exist_ok=True)
 
 KP_LOGO_ABS = shutil.which("kpLogo")
 if not KP_LOGO_ABS:
-    raise Exception("kpLogo not found. Please install according to the Installation Guide in README.")
+    raise Exception("kpLogo not found. Please install and actvivate the environment according to instructions in the README.")
 print(f"Using kpLogo at: {KP_LOGO_ABS}")
 
 meta = pd.read_csv(config["sample_sheet"], dtype={"replicate": str}).set_index(["replicate", "protein", "type"])
@@ -370,4 +370,11 @@ rule clean_all:
         rm -rf {INTERMEDIATE_DIR}
         rm -rf {OUTPUT_DIR}
         rm -rf logs
+        rm done
+        """
+
+rule clean_out:
+    shell:
+        r"""
+        rm -rf {OUTPUT_DIR}
         """

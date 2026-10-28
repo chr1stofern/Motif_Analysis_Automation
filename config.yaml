@@ -1,5 +1,8 @@
 # config.yaml
 
+
+### Samples & Directories ###
+
 # Input, intermediate output and output directories
 # Please ensure your device or server of choice has sufficient storage space for all of the following directories
 # input_dir: "/home/chulfyp1/data/test_download_2"
@@ -15,12 +18,30 @@ preprocessed_seq_dir: "preprocessed_sequences"
 output_dir: "/home/chulfyp1/data/motif_example/output"
 # this stores the final output files
 
-
-
 # Sample names & parameters
 # sample_sheet: "/home/chulfyp1/data/Motif_Analysis_Automation/samples.csv"
 sample_sheet: "/home/chulfyp1/data/Motif_Analysis_Automation/examples.csv"
 # change the names and parameters here to your liking
+
+######
+
+
+### Sequence Preprocessing ###
+# Preprocessing parameters are configured in the sample sheet
+######
+
+
+### Dictionary Mapping & Scatter Plot Generation ###
+
+# Set the following four filters to 1 when using example sequences
+dict_min_count_rep1: 100
+dict_min_count_rep2: 50
+clv_min_count_rep1: 20
+clv_min_count_rep2: 20
+
+min_insert_len: 15
+max_insert_len: 25
+top_n_seq: 4000
 
 # kpLogo parameters
 max_k: 1

@@ -48,9 +48,9 @@ nDictCountFilter1 = cfg.get("dict_min_count_rep1", 100)
 nDictCountFilter2 = cfg.get("dict_min_count_rep2", 50)
 nClvCountFilter1  = cfg.get("clv_min_count_rep1", 20)
 nClvCountFilter2  = cfg.get("clv_min_count_rep2", 20)
-nMinInsertLen     = 15
-nMaxInsertLen     = 25
-nTopNumber        = 4000
+nMinInsertLen     = cfg.get("min_insert_len", 15)
+nMaxInsertLen     = cfg.get("max_insert_len", 25)
+nTopNumber        = cfg.get("top_n_seq", 4000)
 
 m   = load_manifest(cfg)
 
