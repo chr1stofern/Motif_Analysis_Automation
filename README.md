@@ -38,35 +38,42 @@ We use conda to manage the installation of kpLogo and other packages. Please ref
             
 ### UV
 We also recommend using [UV](https://docs.astral.sh/uv/) for managing python-related enviroinments. It can be installed by simply running on the terminal:
-```curl -LsSf https://astral.sh/uv/install.sh | sh
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 ## Installation Guide
 Please clone the repository from GitHub to a desired location on your device or server:
-```git clone <repository-url>
+```bash
+git clone <repository-url>
 ```
 
 ### Setting Up Conda Environment:
 Please move into the cloned directory before proceeding:
-```cd <repository-folder>
+```bash
+cd <repository-folder>
 ```
 
 Run the following command to create an environment with the necessary dependencies as declared by environment.yaml, including kpLogo, via conda:
-```conda env create -f environment.yaml --solver=libmamba
+```bash
+conda env create -f environment.yaml --solver=libmamba
 ```
 (On older versions of Conda where libmamba may not be installed, install it by running the following first:
-```conda install conda-forge::conda-libmamba-solver
+```bash
+conda install conda-forge::conda-libmamba-solver
 ```
 then create the environment.)
 
 Activate the conda environment with:
-```conda activate motif_analysis_env
+```bash
+conda activate motif_analysis_env
 ```
 Please run this every time before running the script.
 
 ### Setting Up UV Environment:
 Simply run:
-```uv sync
+```bash
+uv sync
 ```
 
 ## Initial Configuration
@@ -79,7 +86,8 @@ This package can be used in one of 3 ways: with example (toy) sequences, with ra
 The example sequences are already included in the repository, and are obtained by running the command `awk 'NR % 10 == 0' {ORIGINAL_SEQ.collapsed.tsv} > {EXAMPLE_SEQ.collapsed.tsv}` on RfxCas13d and dictionary sequences.
 
 To download the raw NGS data (deposited in the NCBI Gene Expression Omnibus, GEO, under the accession number GSE313507) necessary for reproducing figures in our publication, please add execution rights to the download script by running: `chmod +x ./fetch_raw.sh`, then run the bash script fetch_raw.sh with the syntax:
-```./fetch_raw.sh {path/tosamples.csv} {path/to/raw_dir}
+```bash
+./fetch_raw.sh {path/tosamples.csv} {path/to/raw_dir}
 ```
 
 The download process will considerable time. If the process crashed mid-run or some samples failed to download, simply run it again. Files that are already downloaded will be skipped. Please check that a total of 22 files of the extension `.fastq.gz` are downloaded.
