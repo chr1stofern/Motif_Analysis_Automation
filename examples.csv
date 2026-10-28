@@ -1,4 +1,4 @@
-﻿assession,replicate,protein,type,adapter_5p,adapter_3p,random_at_3p,min_len,max_len
+﻿accession,replicate,protein,type,adapter_5p,adapter_3p,random_at_3p,min_len,max_len
 /,1,RfxExample,NP,GGCCACCGCACACCATG,AGATCGGAAGAGCACACGTCT,-4,3,35
 /,1,RfxExample,CR,GGCCACCGCACACCATG,AGATCGGAAGAGCACACGTCT,-4,3,35
 /,1,Example,DT,GGCCACCGCACACCATG,CAACCACACACCTG,0,35,35

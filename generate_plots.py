@@ -1,14 +1,12 @@
-import pandas as pd
 import os
 from pathlib import Path
 import yaml
-import numpy as np
 from collections import Counter
 import random
-import matplotlib.ticker as ticker
+import pandas as pd
+import matplotlib as mpl
 from matplotlib import pyplot as plt
 from matplotlib.ticker import FixedLocator, ScalarFormatter
-import matplotlib as mpl
 from scipy.stats import mannwhitneyu
 import seaborn as sns
 import scifont

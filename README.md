@@ -30,11 +30,12 @@ Dictionary: oKWW2182
 - generate plogo to visualise significant motifs
 
 ## Prerequisites
+### Conda
 Note that this package is designed to be run on a Linux distribution as the kpLogo conda package is installed for linux-64 on the genomedk channel. You may also choose to install kpLogo with other methods, but this is not recommended. Alternatively, if you wish to obtain the logos manually using pLogo's [web server](https://plogo.uconn.edu/), you may refer to the "pLogo Generation with pLogo Web Page" section.
 
 We use conda to manage the installation of kpLogo and other packages. Please refer to [Conda's official installation guide](https://docs.conda.io/projects/conda/en/latest/user-guide/index.html) if you do not have Conda installed.
             
-
+### UV
 We also recommend using [UV](https://docs.astral.sh/uv/) for managing python-related enviroinments. It can be installed by simply running on the terminal:
 ````curl -LsSf https://astral.sh/uv/install.sh | sh```` 
 
@@ -61,28 +62,37 @@ Simply run:
 
 ## Initial Configuration
 ### Configuring Input & Output Directories/Files:
-Please modify the ```config.yaml``` accordingly and confirm the correct paths are provided properly. You may also change the sample names and parameters in ````samples.csv```` if necessary.
+Please modify the ```config.yaml``` accordingly and confirm the correct paths are provided properly. 
 
 ### Setting Up Samples:
 This package can be used in one of 3 ways: with example (toy) sequences, with raw sequences from which we produced the figures for our previous publication, and with your own data.
 
 The example sequences are already included in the repository, and are obtained by running the command ````awk 'NR % 10 == 0' {ORIGINAL_SEQ.collapsed.tsv} > {EXAMPLE_SEQ.collapsed.tsv}```` on RfxCas13d and dictionary sequences.
 
-To download the raw NGS data necessary for reproducing figures in our publication, please add execution rights to the download script by running: ````chmod +x ./fetch_raw.sh````, then run the bash script fetch_raw.sh with the syntax:
+To download the raw NGS data (deposited in the NCBI Gene Expression Omnibus, GEO, under the accession number GSE313507) necessary for reproducing figures in our publication, please add execution rights to the download script by running: ````chmod +x ./fetch_raw.sh````, then run the bash script fetch_raw.sh with the syntax:
 ````./fetch_raw.sh {path/tosamples.csv} {path/to/raw_dir}````
 
 The download process will considerable time. If the process crashed mid-run or some samples failed to download, simply run it again. Files that are already downloaded will be skipped. Please check that a total of 22 files of the extension ````.fastq.gz```` are downloaded.
 
 Alternately, you may also download the raw data via the [SRA Explorer](https://sra-explorer.info/#) and search for the accession number GSE313507. Include all 22 files within the series and click "Add to collection". Click on "22 saved datasets" and run the automatically generated download script of your choice. A total of 44 sequence files will be downloaded, since each sample produces two reads (read 1/forward read, and read 2/reverse read). Note that only read 1 (forward read) is required for our analysis. 
 
-Note that the script supports 1-2 replicates. To process more than 2 replicates, you may either edit the internal code, or simply repeat the process and specify a different set of samples to run (save the previous outputs first before re-running).
+Note that the script supports 1-2 replicates. To process more than 2 replicates, you may either edit the internal code, or simply repeat the process and specify a different set of samples for the script to run (save the previous outputs first before re-running).
 
 ### Naming Samples
-If you choose to use the toy sequences or the .sh downlaod script, the downloaded files will already be in the correct naming format. If you choose to use your own data, please make sure your files match the following format:
+If you choose to use the toy sequences or the .sh download script, the downloaded files will already be in the correct naming format. If you choose to use your own data, please make sure your raw sequence files match the following naming format:
 ````{rep#}_{sample/protein name}-{type: CR (crRNA and protein added), or NP (no protein), or DT (dictionary)}.fastq.gz````. For example, for a crRNA added PspCas13b conducted in replicate 1, it shall be named 1_Psp-CR.fastq.gz ({sample/protein name} can be changed to any string of your liking, but must not include "-" or "_"); for a dictionary conducted in replicate 2, it shall be named 2_Dict-DT.fastq.gz (again, "Dict" can be changed to other strings except "-" and "_").
 
-### Raw Sequence Processing --- Parameters for Cleavage and Dictionary Type Samples:
-Please make sure filenames of RAW NGS sequences follow the pattern: {replicate}_{protein}-{type}.fastq.gz, e.g., 1_Lbu-NP.fastq.gz.
+The full list of sequencing samples should also be documented in the sample sheet (by default ````samples.csv```` or ````examples.csv````, you can change where ````sample_sheet```` points to in ````config.yaml````). 
+- Column 1 ````accession````: specifies the GEO assession number of each sample
+- Column 2 ````replicate````: specifies the replicate number --- ````1````, or ````2````
+- Column 3 ````protein````: specifies the protein or sample name (any string without "-" or "_")
+- Column 4 ````type````: specifies the sample type --- ````CR```` (crRNA and protein added), or ````NP```` (no protein), or ````DT```` (dictionary)
+- The remaining columns are described in the next section
+
+If you are using our original data, simply point ````sample_sheet```` to ````samples.csv```` and need not change its content. Similarly, if you are using the example data, point ````sample_sheet```` to ````examples.csv```` and need not its content.
+
+### Configuring Parameters for Raw Sequence Preprocessing:
+Please make sure filenames of RAW NGS sequences follow the naming pattern as aforementioned. After that, please obtain the appropriate 5' and 3' adaptor sequences used in your experiment's sequencing setup, and paste them into column 5 and 6 of the sample sheet. 
 
 Parameters, including adapter sequences and length, for each sample can be changed in samples.csv. Simply use the csv file provided for reproducing the original figures. You may change the parameters based on your on experiment.
 
