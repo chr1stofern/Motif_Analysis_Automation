@@ -32,32 +32,32 @@ Dictionary: oKWW2182
 ## Prerequisites
 Note that this package is designed to be run on a Linux distribution as the kpLogo conda package is installed for linux-64 on the genomedk channel. You may also choose to install kpLogo with other methods, but this is not recommended. Alternatively, if you wish to obtain the logos manually using pLogo's [web server](https://plogo.uconn.edu/), you may refer to the "pLogo Generation with pLogo Web Page" section.
 
-We use conda to manage the installation of kpLogo. If you wish to opt for this route, please refer to [Conda's official installation guide](https://docs.conda.io/projects/conda/en/latest/user-guide/index.html):
+We use conda to manage the installation of kpLogo and other packages. Please refer to [Conda's official installation guide](https://docs.conda.io/projects/conda/en/latest/user-guide/index.html) if you do not have Conda installed.
             
 
-We also recommend using [uv](https://docs.astral.sh/uv/) for managing python-related enviroinments. It can be installed by simply running on the terminal:
+We also recommend using [UV](https://docs.astral.sh/uv/) for managing python-related enviroinments. It can be installed by simply running on the terminal:
 ````curl -LsSf https://astral.sh/uv/install.sh | sh```` 
 
 ## Installation Guide
 Please clone the repository from GitHub to a desired location on your device or server:
-````git clone <repository-url>````
-
-Then, move into the cloned directory:
-````cd <repository-folder>````
+````git clone <repository-url>````.
 
 ### Setting Up Conda Environment:
-Run the following command to create an environment with the necessary dependencies, including kpLogo, via conda:
-````conda env create -f environment.yaml --solver=libmamba````
+Please move into the cloned directory before proceeding::
+````cd <repository-folder>````.
+
+Run the following command to create an environment with the necessary dependencies as declared by environment.yaml, including kpLogo, via conda:
+````conda env create -f environment.yaml --solver=libmamba````.
 (On older versions of Conda where libmamba may not be installed, install it by running the following first:
 ````conda install conda-forge::conda-libmamba-solver````
 then create the environment.)
 
 Activate the conda environment with:
-````conda activate motif_analysis_env````
+````conda activate motif_analysis_env````. Please run this everytime before running the script.
 
 ### Setting Up UV Environment:
 Simply run:
-````uv sync````
+````uv sync````.
 
 ## Initial Configuration
 ### Configuring Input & Output Directories/Files:
