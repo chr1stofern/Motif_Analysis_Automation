@@ -38,33 +38,40 @@ We use conda to manage the installation of kpLogo and other packages. Please ref
             
 ### UV
 We also recommend using [UV](https://docs.astral.sh/uv/) for managing python-related enviroinments. It can be installed by simply running on the terminal:
-```curl -LsSf https://astral.sh/uv/install.sh | sh```
+```curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
 ## Installation Guide
 Please clone the repository from GitHub to a desired location on your device or server:
-```git clone <repository-url>```
+```git clone <repository-url>
+```
 
 ### Setting Up Conda Environment:
 Please move into the cloned directory before proceeding:
-```cd <repository-folder>```
+```cd <repository-folder>
+```
 
 Run the following command to create an environment with the necessary dependencies as declared by environment.yaml, including kpLogo, via conda:
-```conda env create -f environment.yaml --solver=libmamba```
+```conda env create -f environment.yaml --solver=libmamba
+```
 (On older versions of Conda where libmamba may not be installed, install it by running the following first:
-```conda install conda-forge::conda-libmamba-solver```
+```conda install conda-forge::conda-libmamba-solver
+```
 then create the environment.)
 
 Activate the conda environment with:
-```conda activate motif_analysis_env```
+```conda activate motif_analysis_env
+```
 Please run this every time before running the script.
 
 ### Setting Up UV Environment:
 Simply run:
-```uv sync```
+```uv sync
+```
 
 ## Initial Configuration
 ### Configuring Input & Output Directories/Files:
-Within the configuration file ```config.yaml```, please modify the parameters `input_dir`, `intermediate_dir` and `output_dir` to point to directories of your liking. Please make sure these locations, particularly `input_dir`, has sufficient storage (at least 100 GB). You may also modify the names of `preprocessed_seq_dir` and `output_dir` if you wish. But their locations will not be changed.
+Within the configuration file `config.yaml`, please modify the parameters `input_dir`, `intermediate_dir` and `output_dir` to point to directories of your liking. Please make sure these locations, particularly `input_dir`, has sufficient storage (at least 100 GB). You may also modify the names of `preprocessed_seq_dir` and `output_dir` if you wish. But their locations will not be changed.
 
 ### Setting Up Samples:
 This package can be used in one of 3 ways: with example (toy) sequences, with raw sequences from which we produced the figures for our previous publication, and with your own data.
@@ -72,7 +79,8 @@ This package can be used in one of 3 ways: with example (toy) sequences, with ra
 The example sequences are already included in the repository, and are obtained by running the command `awk 'NR % 10 == 0' {ORIGINAL_SEQ.collapsed.tsv} > {EXAMPLE_SEQ.collapsed.tsv}` on RfxCas13d and dictionary sequences.
 
 To download the raw NGS data (deposited in the NCBI Gene Expression Omnibus, GEO, under the accession number GSE313507) necessary for reproducing figures in our publication, please add execution rights to the download script by running: `chmod +x ./fetch_raw.sh`, then run the bash script fetch_raw.sh with the syntax:
-```./fetch_raw.sh {path/tosamples.csv} {path/to/raw_dir}```
+```./fetch_raw.sh {path/tosamples.csv} {path/to/raw_dir}
+```
 
 The download process will considerable time. If the process crashed mid-run or some samples failed to download, simply run it again. Files that are already downloaded will be skipped. Please check that a total of 22 files of the extension `.fastq.gz` are downloaded.
 
@@ -84,7 +92,7 @@ Note that the script supports 1-2 replicates. To process more than 2 replicates,
 If you choose to use the toy sequences or the .sh download script, the downloaded files will already be in the correct naming format. If you choose to use your own data, please make sure your raw sequence files match the following naming format:
 `{rep#}_{sample/protein name}-{type: CR (crRNA and protein added), or NP (no protein), or DT (dictionary)}.fastq.gz`. For example, for a crRNA added PspCas13b conducted in replicate 1, it shall be named 1_Psp-CR.fastq.gz ({sample/protein name} can be changed to any string of your liking, but must not include "-" or "_"); for a dictionary conducted in replicate 2, it shall be named 2_Dict-DT.fastq.gz (again, "Dict" can be changed to other strings except "-" and "_").
 
-The full list of sequencing samples should also be documented in the sample sheet (by default ````samples.csv```` or ````examples.csv````, you can change where `sample_sheet` points to in `config.yaml`). 
+The full list of sequencing samples should also be documented in the sample sheet (by default `samples.csv` or `examples.csv`, you can change where `sample_sheet` points to in `config.yaml`). 
 - Column 1 `accession`: specifies the GEO assession number of each sample
 - Column 2 `replicate`: specifies the replicate number --- `1`, or `2`
 - Column 3 `protein`: specifies the protein or sample name (any string without "-" or "_")
