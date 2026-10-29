@@ -1,6 +1,7 @@
 # config.yaml
 
 
+
 ### Samples & Directories ###
 
 # Input, intermediate output and output directories
@@ -26,6 +27,7 @@ sample_sheet: "/home/chulfyp1/data/Motif_Analysis_Automation/examples.csv"
 #############################
 
 
+
 ### Sequence Preprocessing ###
 # Preprocessing parameters are configured in the sample sheet
 ##############################
@@ -46,18 +48,16 @@ max_insert_len: 25
 # Set the following to 4000 for full data, 40 for example data
 top_n_seq: 40
 
-# ---- Supp-Fig-6a: rank-group cleavage efficiency, one figure per CR sample ----
-# The loop below produces one figure per protein with a `-CR` sample in samples.csv.
-# The bins/labels/palette are fixed analysis choices (edit the .py to change them).
+# Supp-Fig-6a: rank-grouped relative cleavage efficiency
+# The loop below produces one figure per protein sequence pair (CR+NP)
 supp6a:
   bins:   [0, 400, 1600, 4000, .inf]      # YAML parses '.inf' as float('inf')
   labels: ["Top400", "Top401–1600", "Top1601–4000", "The rest"]
-  # colours are chosen in the .py from this list, in the same order as `labels`
   colors: ["tab:blue", "tab:orange", "tab:green", "tab:red"]
 
-# ---- Fig-2f: motif boxplot + Mann-Whitney vs reference, for one target sample ----
+# Fig-2f: motif boxplot + Mann-Whitney vs reference, for one target sample
 # fig2f:
-#   target:     "Psp-withProtein"
+#   target:     "Psp-CR"
 #   motifs:     ["TAT", "TCA", "CAA", "GTT"]
 #   reference:  "GTT"
 #   rep1_ylim:  [0, 1]
@@ -66,7 +66,7 @@ supp6a:
 #   stats_out:  "fig2_psp_mann-whitney.tsv"
 fig2f: null
 
-# ---- Fig-2c / Fig-2e: per-sample motif-scatter recipes ----
+# Fig-2c / Fig-2e: per-sample motif-scatter recipes
 # One entry per (protein)-CR sample. `out` filenames must match the Snakefile's rule-all list.\
 # plot compares 2 replicates, please comment out if only 1 replicate is involved
 motif_figs:
@@ -74,52 +74,53 @@ motif_figs:
   #   motif_type: 2nt_motif
   #   n_top: 5
   #   n_bottom: 0
+  #   highlight: null
   #   xlim: [0.1, 0.37]
   #   ylim: [0.4, 1.9]
   #   out: fig2c_lbu_motif-clv-eff.pdf
-  #   highlight: null
   # Lwa-CR:
   #   motif_type: 2nt_motif
   #   n_top: 3
   #   n_bottom: 0
+  #   highlight: "CT"
   #   xlim: [0.22, 0.6]
   #   ylim: [0.9, 1.9]
   #   out: fig2c_lwa_motif-clv-eff.pdf
-  #   highlight: "CT"
   # Bt3-CR:
   #   motif_type: 2nt_motif
   #   n_top: 1
   #   n_bottom: 0
+  #   highlight: null
   #   xlim: [0.2, 0.45]
   #   ylim: [0.75, 2.45]
   #   out: fig2c_bt3_motif-clv-eff.pdf
-  #   highlight: null
   # Rfx-CR:
   #   motif_type: 2nt_motif
   #   n_top: 1
   #   n_bottom: 0
+  #   highlight: null
   #   xlim: [0.3, 0.56]
   #   ylim: [0.65, 2.9]
   #   out: fig2c_rfx_motif-clv-eff.pdf
-  #   highlight: null
   # Psp-CR:
   #   motif_type: 3nt_motif
   #   n_top: 7
   #   n_bottom: 3
+  #   highlight: null
   #   xlim: [0.15, 0.47]
   #   ylim: [0.8, 2.8]
   #   out: fig2e_psp_motif-clv-eff.pdf
-  #   highlight: null
   RfxExample-CR:
     motif_type: 2nt_motif
     n_top: 1
     n_bottom: 0
+    highlight: null
     xlim: [0.3, 0.56]
     ylim: [0.65, 2.9]
     out: fig2c_rfx_motif-clv-eff.pdf
-    highlight: null
 
 ####################################################
+
 
 
 ### pLogo Generation with kpLogo Package ###

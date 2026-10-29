@@ -333,6 +333,8 @@ for prot in cr_proteins:
 def plot_motif_scatter(mapped_pairs, target, motif_type,
                        n_top, n_bottom, xlim, ylim, out_path,
                        highlight_motif=None):
+
+        
     """Rep1 vs Rep2 mean clv/dict scatter for one (protein, type) sample.
 
     mapped_pairs : list of ((rep1, sClvName1, df1), (rep2, sClvName2, df2)) tuples
@@ -340,6 +342,12 @@ def plot_motif_scatter(mapped_pairs, target, motif_type,
     motif_type   : '2nt_motif' or '3nt_motif'
     highlight_motif : optional motif to force-highlight (e.g. 'CT' for Lwa)
     """
+    
+    if highlight_motif is None:
+        highlight_motif = []
+    elif isinstance(highlight_motif, str):
+        highlight_motif = [highlight_motif]
+        
     for xRep1, xRep2 in mapped_pairs:
         sample_key = xRep1[1].split('_', 1)[1]          # 'Lbu-CR'
         if sample_key != target:
@@ -369,7 +377,7 @@ def plot_motif_scatter(mapped_pairs, target, motif_type,
 
         label_groups = [(top, 'tab:red'), (bottom, 'tab:blue')]
         if highlight_motif is not None:
-            df_interest = others[others[motif_type] == highlight_motif]
+            df_interest = others[others[motif_type].isin(highlight_motif)]
             if not df_interest.empty:
                 sns.scatterplot(data=df_interest, x='mean_clvOverDict_rep1', y='mean_clvOverDict_rep2',
                                 color='tab:blue', s=50, edgecolor='black', linewidth=0.5, ax=ax)
@@ -427,10 +435,9 @@ if f2f:
     fig = plt.figure(figsize=(4.5, 6))
     i = 0
     for sLabelRep, sClvName, dfClvConcat in lAllMappedClv:
-        if sTargetSampleName != display_name(sClvName):
+        if sTargetSampleName != _sample_key(sClvName):
             continue
         i += 1
-        sRepSampleName = f'{sLabelRep}_{display_name(sClvName)}'
 
         filtered_dfClvConcat = dfClvConcat[dfClvConcat['3nt_motif'].isin(lSelectedMotifs)]
 

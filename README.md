@@ -17,22 +17,22 @@ Rfx: Targetting crRNA
 Dictionary: oKWW2182  
 
 ### What the Code Does
-1. Raw NGS Reads Preprocessing\
+1. **Raw NGS Reads Preprocessing:**\
 Each sequencing read is reduced to the insert/substrate fragment it contains, i.e. the sequence the Cas13 protein actually recognises. The preprocessing is conducted with various command line packages, including fastqc, cutadapt, fastq_quality_filter, fastx_collapser and seqkit, all of which are called by a fully automated `snakemake` script (`Snakefile`).
-    - Adapter trimming: the 5' and 3' sequencing adapters are removed from both cleavage and dictionary samples.
-    - Trimming the last 4nt random region: for cleavage libraries, the last 4 nt of the insert were synthesised as a random region and carry no motif information and shall be trimmed. Dictionary inserts are fixed and thus unmodified.
-    - Length filtering: reads are kept only if their insert falls within the expected size range: 1–35 nt for cleavage libraries, and exactly 35 nt for the dictionary. This removes empty inserts, adapter dimers, and reads longer than the library design.
-    - Quality filtering: reads are discarded unless at least 90% of their bases have a Phred quality score of 30 or higher. This removes reads with sequencing errors that would otherwise corrupt the insert.
-    - Collapsing reads: identical inserts are collapsed into unique sequences with their read counts, and the result is written as a tab-separated table (*.collapsed.tsv). This table will be read by `generate_plots.py` which conducts the downstream motif analysis.
+    - **Adapter trimming:** the 5' and 3' sequencing adapters are removed from both cleavage and dictionary samples.
+    - **Trimming the last 4nt random region:** for cleavage libraries, the last 4 nt of the insert were synthesised as a random region and carry no motif information and shall be trimmed. Dictionary inserts are fixed and thus unmodified.
+    - **Length filtering:** reads are kept only if their insert falls within the expected size range: 1–35 nt for cleavage libraries, and exactly 35 nt for the dictionary. This removes empty inserts, adapter dimers, and reads longer than the library design.
+    - **Quality filtering:** reads are discarded unless at least 90% of their bases have a Phred quality score of 30 or higher. This removes reads with sequencing errors that would otherwise corrupt the insert.
+    - **Collapsing reads:** identical inserts are collapsed into unique sequences with their read counts, and the result is written as a tab-separated table (*.collapsed.tsv). This table will be read by `generate_plots.py` which conducts the downstream motif analysis.
 
-2. Motif Analysis\
+2. **Motif Analysis:**\
 The collapsed reads are filtered for a final time. Then, the inserts are mapped back to the dictionary to measure how efficiently each sequence was cleaved, and the enriched motifs are then visualised.
-    - Dictionary filtering: dictionary sequences are kept only if they were observed above a minimum read count (100 in replicate 1, 50 in replicate 2).
-    - Insert filtering: cleavage fragments are kept only if they were observed above a minimum read count of 20 and have an insert length between 15 and 24 nt.
-    - Mapping: each cleavage fragment is matched to the dictionary prefix of the same length. The position of the fragment's 3' end in the dictionary is taken as the cleavage site, and the 2-nt and 3-nt motifs around that position are extracted.
-    - Computing relative cleavage efficiency: for each fragment, the ratio of its count in the cleavage library to its count in the dictionary gives a relative cleavage efficiency, which is used to rank all fragments.
-    - Replicate comparison: the mean efficiency of each motif is compared between the two replicates and plotted as a scatterplot. Motifs that are consistently enriched or depleted across replicates can then be identified.
-    - Logo generation: the top-ranked motifs are written as input sequences for pLogo, which visualises the significantly enriched bases at the cleavage site.
+    - **Dictionary filtering:** dictionary sequences are kept only if they were observed above a minimum read count (100 in replicate 1, 50 in replicate 2).
+    - **Insert filtering:** cleavage fragments are kept only if they were observed above a minimum read count of 20 and have an insert length between 15 and 24 nt.
+    - **Mapping to dictionary:** each cleavage fragment is matched to the dictionary prefix of the same length. The position of the fragment's 3' end in the dictionary is taken as the cleavage site, and the 2-nt and 3-nt motifs around that position are extracted.
+    - **Computing relative cleavage efficiency:** for each fragment, the ratio of its count in the cleavage library to its count in the dictionary gives a relative cleavage efficiency, which is used to rank all fragments.
+    - **Replicate comparison:** the mean efficiency of each motif is compared between the two replicates and plotted as a scatterplot. Motifs that are consistently enriched or depleted across replicates can then be identified.
+    - **Logo generation:** the top-ranked motifs are written as input sequences for pLogo, which visualises the significantly enriched bases at the cleavage site.
 
 ### Intermediate Output Files
 The intermediate output directory is specified as `intermediate_dir` in the configuration file (more details in [Configuring Input & Output Directories/Files](#configuring-input--output-directoriesfiles)). The `intermediate_dir` is utilised by the script for depositing three products, 1., partially or fully processed sequencing reads (but not RAW reads) from `Snakefile`; 2., filtered and mapped sequences from `generate_plots.py` that serve as inputs for kpLogo motif visualisation; and 3, the full output of the kpLogo package for every sample. The first is stored in `intermediate_dir/preprocessed_seq_dir`, the second is stored in `intermediate_dir/logo_input`, and the third is stored in `intermediate_dir/logo_output`.
@@ -43,17 +43,24 @@ Note that the processed example reads are stored in `intermediate_files/sampled_
 A total of 3 subdirectories, namely `main_fig`, `supp_fig` and `motif_plogo`, and one xlsx sheet will be produced in the `output_dir`. If you choose to use our dataset from GSE313507, there will be 7 files in `main_fig` by default, each corresponding to parts of the main figures in the publication; 6 files in `supp_fig`, each corresponding to parts of the supplementary figures in the publication; and 10 files in `motif_plogo` corresponding to the motifs of the 5 Cas13 protein tested in two replicates. For details on choosing parameters, please refer to the [Initial Configuration](#initial-configuration) section
 
 By default, the following files with be produced in each subdirectory:
-1. `supp_fig`
-    - Supp. fig. 3a, b: sequencing depth of dictionary libraries, plotted as the distribution of the number of reads per unique sequence in each replicate. Fig. 3a corresponds to replicate 1, fig. 3b corresponds to replicate 2. The dashed blue line indicates the minimum read threshold used for filtering the dictionary reads before generating the boxplot.
-    - Supp. fig. 4a, b: sequencing depth of cleavage libraries, plotted as the distribution of the number of reads per unique sequence each replicate. Fig. 4a corresponds to replicate 1, fig. 4b corresponds to replicate 2. The dashed blue line indicates the minimum read threshold used for filtering the cleavage reads before generating the boxplot. Note that the plots correspond to the subset of reads after mapping onto the dictionary.
-    - Supp. fig. 5a, b: distribution of relative cleavage efficiencies of cleaved sequences, plotted against sequence rank. Fig. 5a corresponds to replicate 1, fig. 5b corresponds to replicate 2. The dashed blue line indicates the rank threshold, used for filtering in only the top sequences to the left of the line for downstream pLogo motif visualisation.
-    - Supp. fig. 6a: relative cleavage efficiency of the top 400, 401–1,600, 1,601–4,000, and remaining cleaved sequences from cleavage samples.
-    - Supp. fig. 6b: cleavage motifs of various Cas13 proteins. The protein added samples were used as foreground in pLogo/kpLogo to identify 8-mer cleavage motif, and no-protein-added control samples are provided to pLogo/kpLogo as the background (both types of samples are processed in the same way in `generate_plots.py). The dashed red line indicate cleavage positions.
+1. **`supp_fig`:**
+    - **Supp. fig. 3a, b:** sequencing depth of dictionary libraries, plotted as the distribution of the number of reads per unique sequence in each replicate. Fig. 3a corresponds to replicate 1, fig. 3b corresponds to replicate 2. The dashed blue line indicates the minimum read threshold used for filtering the dictionary reads before generating the boxplot.
+    - **Supp. fig. 4a, b:** sequencing depth of cleavage libraries, plotted as the distribution of the number of reads per unique sequence each replicate. Fig. 4a corresponds to replicate 1, fig. 4b corresponds to replicate 2. The dashed blue line indicates the minimum read threshold used for filtering the cleavage reads before generating the boxplot. Note that the plots correspond to the subset of reads after mapping onto the dictionary.
+    - **Supp. fig. 5a, b:** distribution of relative cleavage efficiencies of cleaved sequences, plotted against sequence rank. Fig. 5a corresponds to replicate 1, fig. 5b corresponds to replicate 2. The dashed blue line indicates the rank threshold, used for filtering in only the top sequences to the left of the line for downstream pLogo motif visualisation.
+    - **Supp. fig. 6a:** relative cleavage efficiency of the top 400, 401–1,600, 1,601–4,000, and remaining cleaved sequences from cleavage samples.
 
-2. `main_fig`
-    - Fig. 2c: relative cleavage efficiency of dinucleotide motifs in both replicates of non-PspCas13b proteins. Most efficient (top few) motifs are shown in red, inefficient motifs are shown in gray
-    - Fig. 2e: relative cleavage efficiency of trinucleotide motifs in both replicates of PspCas13b. Most efficient (top few) motifs are shown in red, inefficient motifs are shown in gray
-    - Fig. 2f: relative cleavage efficiency of representative trinucleotide motifs of PspCas13b
+Note that for supp. fig. 6a, only one pair of duo-replicate plot for the protein PspCas13b is shown in the original publication. Here, the script automatically generates one paired plot (or single plot if only 1 replicate is provided) for each protein sample involved. Thus, when using the full dataset, a total of of 5 plots will be generated, each corresponding to one of five protein samples.
+
+2. **`mapped_clv_seq_full.xlsx`:**
+A full record of every cleavage fragment that was successfully mapped to the dictionary. Each sample is recorded on a separate sheet. Data obtained from the analysis, including 2/3nt motifs and ranks are also included along with the fragment sequence itself.
+
+3. **`main_fig`:**
+    - **Fig. 2c:** relative cleavage efficiency of dinucleotide motifs in both replicates of non-PspCas13b proteins. Most efficient (top few) motifs are shown in red, inefficient motifs are shown in gray
+    - **Fig. 2e:** relative cleavage efficiency of trinucleotide motifs in both replicates of PspCas13b. Most efficient (top few) motifs are shown in red, inefficient motifs are shown in gray
+    - **Fig. 2f:** relative cleavage efficiency of representative trinucleotide motifs of PspCas13b
+
+4. **`motif_plogo`:**
+This directory contains a minimal version of kpLogo's output, i.e., the .pdf file of the pLogo generated for each CR-NP sample pair. The full output generated by kpLogo can be found in `intermediate_dir/logo_output` as mentioned in [Intermediate Output Files](#intermediate-output-files).
 
 ## Prerequisites
 ### Conda
@@ -146,21 +153,102 @@ The remaining 3 columns of `sample_sheet` allows for additional control on the t
 If you decide to apply the pipeline on sequences of your choice, please modify the sample importing and exporting logic of `generate_plots.py` accordingly, particularly for the `MOTIF_FIGS` dictionary, and the sections Supp-Fig-6a and Fig-2f.
 
 After the adaptor trimming, the adaptor-trimmed sequences are further processed with a count and length filter. The relevant parameters can be found and modified in `config.yaml`.
-Count Filters:
+
+**Count Filters:**
 - `dict_min_count_rep1`: minimum count of a particular sequence in the dictionary sample of replicate 1 for it to be filtered in
 - `dict_min_count_rep2`: minimum count of a particular sequence in the dictionary sample of replicate 2 for it to not be filtered in
 - `clv_min_count_rep1`: minimum count of a particular sequence in the cleavage sample of replicate 1 for it to be filtered in
 - `clv_min_count_rep2`: minimum count of a particular sequence in the cleavage sample of replicate 1 for it to be filtered in
 Note that we use different values for `dict_min_count_rep1` and `dict_min_count_rep2`, since the sequencing depth of the dictionary from replicate 1 is higher than that of replicate 2. For processing the example sequences, please use a low count of 1 for all filters. For your own data, please adjust accordingly.
 
-Length Filters:
+**Length Filters:**
 - `min_insert_len`: minimum length of a particular sequence in the cleavage sample for it to be filtered in
 - `max_insert_len`: maximum length of a particular sequence in the cleavage sample for it to be filtered in
 The final processed sequence (insert) to be mapped to the dictionary must be equal to or longer than the `min_insert_len`, and shorter than the `max_insert_len` before proceeding.
 For processing our full data or the example data, keep these as is. For your own data, please adjust accordingly.
 
-Rank Filter:
+**Rank Filter:**
 After all sequences are mapped to the dictionary, the sequences are ranked based on their count, and only the top 4000 sequences are taken for pLogo visualisation for our data. This can be controlled by the parameter `top_n_seq` in `config.yaml`, and it also changes the line drawn in the plot of relative cleavage efficiency against ranked sequences (supp. fig. 5) for ease of reference. For our full data, keep the parameter as 4000; for the example data, change it to 40. For your own data, please adjust accordingly.
+
+**Parameters for Supp. Fig. 6a:**
+The grouping of ranked motifs into separate bins can be modified to your liking. In the publication, we separated the motifs into the top 0-400 (top 400) ranked motifs, the top 401-1600, the top 1601-4000, and the remaining (4001-infinity). The actual grouping of data can be modified at `bins:` in the `supp6a:` section of config.yaml. For the full data, we write `bins:   [0, 400, 1600, 4000, .inf]` where .inf denotes infinity. To change the labels along the x-axis of the figure, modify the second parameter `labels:`. To change the colour of individual boxes for each group, modify `colors:`.
+
+**Parameters for Fig. 2f:**
+This figure is only generated for PspCas13b. When using the full dataset, make sure the following block in `config.yaml` remains uncommented:
+```yaml
+fig2f:
+  target:     "Psp-CR"
+  motifs:     ["TAT", "TCA", "CAA", "GTT"]
+  reference:  "GTT"
+  rep1_ylim:  [0, 1]
+  rep2_ylim:  [0, 6]
+  out:        "fig2f_psp_clv-eff.pdf"
+  stats_out:  "fig2_psp_mann-whitney.tsv"
+```
+Otherwise, when using the example data, comment it out and replace the block with/add the line: 
+```yaml
+fig2f: null
+```
+If you wish to construct this plot for your own data, please modify `target:` to select the desired sample for analysis. To select other motifs relevant for your protein, please modify `motifs:`. The `reference:` motif specifies the motif that the target `motifs:` will be tested against for significance. `rep1_ylim:` and `rep2_ylim:` controls the height of the y-axis of the plot for replicate 1 and replicate 2 respectively. You may also modify the output path of the figure with `out:`. Finally, an additional .tsv file containing the significance values (obtained from the Mann–Whitney U test of the motifs) will also be exported. Again, you may modify the output path of this data file via `stats_out:`.
+
+**Parameters for Fig. 2c/e:**
+Since Fig. 2c/e plots the cleavage efficiencies of both replicates 1 and 2, please comment out the entire indented section following `motif_figs:` (comment `motif_figs:` itself as well). If using the full dataset, you may use the following setup:
+```yaml
+motif_figs:
+  Lbu-CR:
+    motif_type: 2nt_motif
+    n_top: 5
+    n_bottom: 0
+    highlight: null
+    xlim: [0.1, 0.37]
+    ylim: [0.4, 1.9]
+    out: fig2c_lbu_motif-clv-eff.pdf
+  Lwa-CR:
+    motif_type: 2nt_motif
+    n_top: 3
+    n_bottom: 0
+    highlight: "CT"
+    xlim: [0.22, 0.6]
+    ylim: [0.9, 1.9]
+    out: fig2c_lwa_motif-clv-eff.pdf
+  Bt3-CR:
+    motif_type: 2nt_motif
+    n_top: 1
+    n_bottom: 0
+    highlight: null
+    xlim: [0.2, 0.45]
+    ylim: [0.75, 2.45]
+    out: fig2c_bt3_motif-clv-eff.pdf
+  Rfx-CR:
+    motif_type: 2nt_motif
+    n_top: 1
+    n_bottom: 0
+    highlight: null
+    xlim: [0.3, 0.56]
+    ylim: [0.65, 2.9]
+    out: fig2c_rfx_motif-clv-eff.pdf
+  Psp-CR:
+    motif_type: 3nt_motif
+    n_top: 7
+    n_bottom: 3
+    highlight: null
+    xlim: [0.15, 0.47]
+    ylim: [0.8, 2.8]
+    out: fig2e_psp_motif-clv-eff.pdf
+```
+If using the example data, replace the block with:
+```yaml
+motif_figs:
+  RfxExample-CR:
+    motif_type: 2nt_motif
+    n_top: 1
+    n_bottom: 0
+    highlight: null
+    xlim: [0.3, 0.56]
+    ylim: [0.65, 2.9]
+    out: fig2c_rfx_motif-clv-eff.pdf
+```
+If you are using your own data, please change the first indented line (e.g., RfxExample-CR) to your sample names following the {protein/sample}-{type} format (replicate number is not necessary). Then, specify whether the protein recognises a 2nt or 3nt motif in `motif_type:` as `2nt_motif` or `3nt_motif` respectively. n_top specifies the number of top ranked motif(s) you wish to highlight on the plot, and conversely, n_bottom specifies the number of the lowest ranked motif(s) you wish to highlight on the plot. If there are other motifs you wish to highlight but are not among the top and bottom few motifs, you can specify them with the format `highlight: ["motif_string_1", "motif_string_2"]`, e.g., `highlight: ["CT", "GG"]`. `xlim` and `ylim` controls the visible range of the two axes. You may modify them accordingly if some data points clip outside of the figure. Lastly, `out` controls the output path of the figure generated.
 
 ### pLogo Generation with kpLogo Package:
 
@@ -171,25 +259,37 @@ After all sequences are mapped to the dictionary, the sequences are ranked based
 
 ## Running the Script
 To run the entire pipeline, execute the following:
-````uv run snakemake --core 30````
+````bash
+uv run snakemake --core 30
+````
 
 ## Cleanup Guide
 ### Removing Intermediate Output & Output Files:
-Simply remove the directories you specified in ````config.yaml```` by running ````rm -rf <dir>````. Alternatively, you may use the automatic clean up rule in snakemake by running:
-````uv run snakemake --cores 4 clean_all```` 
+Simply remove the directories you specified in `config.yaml` by running `rm -rf <dir>`. Alternatively, you may use the automatic clean up rule in snakemake by running:
+```bash
+uv run snakemake --cores 4 clean_all
+``` 
 
 ### Removing Environments
 For the Conda environment, deactivate it first:
-````conda deactivate````
+```bash
+conda deactivate
+```
 
 Then, remove the conda environment:
 ````conda env remove -n motif_analysis_env````
 
 and clear the package cache:
-````conda clean --packages --tarballs````
+```bash
+conda clean --packages --tarballs
+```
 
 For the UV environment, deactivate with:
-````deactivate````
+```bash
+deactivate
+```
 
 Then, remove the environment with:
-````rm -rf .venv````
+```bash
+rm -rf .venv
+```
