@@ -1,4 +1,4 @@
-# Title Here
+# High-Throughput in vitro Cleavage Assay for Cas13 Motif Discovery
 
 ## Overview
 ### Experiment
@@ -17,7 +17,7 @@ Rfx: Targetting crRNA
 Dictionary: oKWW2182  
 
 ### What the Code Does
-1. Raw NGS Reads Preprocessing
+1. Raw NGS Reads Preprocessing\
 Each sequencing read is reduced to the insert/substrate fragment it contains, i.e. the sequence the Cas13 protein actually recognises. The preprocessing is conducted with various command line packages, including fastqc, cutadapt, fastq_quality_filter, fastx_collapser and seqkit, all of which are called by a fully automated `snakemake` script (`Snakefile`).
     - Adapter trimming: the 5' and 3' sequencing adapters are removed from both cleavage and dictionary samples.
     - Trimming the last 4nt random region: for cleavage libraries, the last 4 nt of the insert were synthesised as a random region and carry no motif information and shall be trimmed. Dictionary inserts are fixed and thus unmodified.
@@ -25,7 +25,7 @@ Each sequencing read is reduced to the insert/substrate fragment it contains, i.
     - Quality filtering: reads are discarded unless at least 90% of their bases have a Phred quality score of 30 or higher. This removes reads with sequencing errors that would otherwise corrupt the insert.
     - Collapsing reads: identical inserts are collapsed into unique sequences with their read counts, and the result is written as a tab-separated table (*.collapsed.tsv). This table will be read by `generate_plots.py` which conducts the downstream motif analysis.
 
-2. Motif Analysis
+2. Motif Analysis\
 The collapsed reads are filtered for a final time. Then, the inserts are mapped back to the dictionary to measure how efficiently each sequence was cleaved, and the enriched motifs are then visualised.
     - Dictionary filtering: dictionary sequences are kept only if they were observed above a minimum read count (100 in replicate 1, 50 in replicate 2).
     - Insert filtering: cleavage fragments are kept only if they were observed above a minimum read count of 20 and have an insert length between 15 and 24 nt.
@@ -35,12 +35,12 @@ The collapsed reads are filtered for a final time. Then, the inserts are mapped 
     - Logo generation: the top-ranked motifs are written as input sequences for pLogo, which visualises the significantly enriched bases at the cleavage site.
 
 ### Intermediate Output Files
-The intermediate output directory is specified as `intermediate_dir` in the configuration file (more details in [Configuring Input & Output Directories/Files](#configuring-input--output-directoriesfiles))
-...
-preprocessed_seq_dir
+The intermediate output directory is specified as `intermediate_dir` in the configuration file (more details in [Configuring Input & Output Directories/Files](#configuring-input--output-directoriesfiles)). The `intermediate_dir` is utilised by the script for depositing three products, 1., partially or fully processed sequencing reads (but not RAW reads) from `Snakefile`; 2., filtered and mapped sequences from `generate_plots.py` that serve as inputs for kpLogo motif visualisation; and 3, the full output of the kpLogo package for every sample. The first is stored in `intermediate_dir/preprocessed_seq_dir`, the second is stored in `intermediate_dir/logo_input`, and the third is stored in `intermediate_dir/logo_output`.
+
+Note that the processed example reads are stored in `intermediate_files/sampled_tsv` inside the cloned repository. Refer to [Initial Configuration](#initial-configuration) on how to use the example sequences and configure the directory paths.
 
 ### Final Output Files:
-A total of 3 subdirectories, namely `main_fig`, `supp_fig` and `motif_plogo`, and one xlsx sheet will be produced in the `output_dir`. If you choose to use our dataset from GSE313507, there will be 7 files in ```main_fig``` by default, each corresponding to parts of the main figures in the publication; 6 files in ````supp_fig````, each corresponding to parts of the supplementary figures in the publication; and 10 files in `motif_plogo` corresponding to the motifs of the 5 Cas13 protein tested in two replicates. For details on choosing parameters, please refer to the [Initial Configuration](#initial-configuration) section
+A total of 3 subdirectories, namely `main_fig`, `supp_fig` and `motif_plogo`, and one xlsx sheet will be produced in the `output_dir`. If you choose to use our dataset from GSE313507, there will be 7 files in `main_fig` by default, each corresponding to parts of the main figures in the publication; 6 files in `supp_fig`, each corresponding to parts of the supplementary figures in the publication; and 10 files in `motif_plogo` corresponding to the motifs of the 5 Cas13 protein tested in two replicates. For details on choosing parameters, please refer to the [Initial Configuration](#initial-configuration) section
 
 By default, the following files with be produced in each subdirectory:
 1. `supp_fig`
@@ -103,8 +103,7 @@ uv sync
 ### Configuring Input & Output Directories/Files:
 Within the configuration file `config.yaml`, please modify the parameters `input_dir`, `intermediate_dir` and `output_dir` to point to directories of your liking. Please make sure these locations, particularly `input_dir`, has sufficient storage (at least 100 GB). You may also modify the names of `preprocessed_seq_dir` and `output_dir` if you wish. But their locations will not be changed.
 
-If you are testing the example sequences (more in the next section), please set `intermediate_dir` as `{path/to/cloned/repo}/intermediate_files`, and `preprocessed_seq_dir` as `sampled_tsv`.
-
+If you are testing the example sequences (more in the next section), please set `intermediate_dir` as `{full/path/to/cloned/repo}/intermediate_files`, and `preprocessed_seq_dir` as `sampled_tsv`.
 
 ### Setting Up Samples:
 This package can be used in one of 3 ways: with example sequences, with the full dataset from which we produced the figures for our previous publication, and with your own data.
@@ -113,7 +112,7 @@ The example sequences are already included in the repository, and are obtained b
 
 To download the raw NGS data (deposited in the NCBI Gene Expression Omnibus, GEO, under the accession number GSE313507) necessary for reproducing figures in our publication, please add execution rights to the download script by running: `chmod +x ./fetch_raw.sh`, then run the bash script fetch_raw.sh with the syntax:
 ```bash
-./fetch_raw.sh {path/tosamples.csv} {path/to/raw_dir}
+./fetch_raw.sh {full/path/tosamples.csv} {full/path/to/raw_dir}
 ```
 
 The download process will take considerable time. If the process crashed mid-run or some samples failed to download, simply run it again. Files that are already downloaded will be skipped. Please check that a total of 22 files of the extension `.fastq.gz` are downloaded.
