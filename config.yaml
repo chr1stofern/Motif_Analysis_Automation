@@ -13,8 +13,9 @@ input_dir: "/home/chulfyp1/data/Motif_Analysis_Automation/example_seq"
 # intermediate_dir: "/home/chulfyp1/data/motif/intermediate_files"
 intermediate_dir: "/home/chulfyp1/data/Motif_Analysis_Automation/intermediate_files"
 # intermediate output files will be exported here
+# preprocessed_seq_dir: "preprocessed_sequences"
 preprocessed_seq_dir: "sampled_tsv"
-# preprocessed-seq_dir is located inside intermediate_dir for storage of preprocessed and collapsed sequences in .tsv format
+# preprocessed-seq_dir is located inside intermediate_dir for storing preprocessed and collapsed sequences in .tsv format
 # output_dir: "/home/chulfyp1/data/motif/output"
 output_dir: "/home/chulfyp1/data/motif_example/output"
 # this stores the final output files
@@ -31,6 +32,8 @@ sample_sheet: "/home/chulfyp1/data/Motif_Analysis_Automation/examples.csv"
 ### Sequence Preprocessing ###
 # Preprocessing parameters are configured in the sample sheet
 ##############################
+
+
 
 ### Dictionary Mapping & Scatter Plot Generation ###
 
@@ -129,10 +132,9 @@ max_k: 1
 min_count: 0
 p_cutoff: 0.05
 fdr: false
-# markov: 1
 region: null
 weighted: false
 ranked: false
-extra_args: "-plot s -stack_order 1 -fix 1.1 -pseudo 2.5"
+extra_args: "-plot s -stack_order -1 -pseudo 2.5"
 
 ############################################

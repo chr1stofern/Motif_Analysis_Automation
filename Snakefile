@@ -107,12 +107,12 @@ rule all:
         # full mapped table
         f'{OUTPUT_DIR}/mapped_clv_seq_full.xlsx',
 
-        # kpLogo outputs
-        expand(os.path.join(LOGO_OUTPUT_DIR,
-                            "{replicate}_{protein}/image/{replicate}_{protein}.info.eps"),
-               zip,
-               replicate=[r for (r, p) in KPLOGO_PAIRS],
-               protein=[p for (r, p) in KPLOGO_PAIRS]),
+        # # kpLogo outputs
+        # expand(os.path.join(LOGO_OUTPUT_DIR,
+        #                     "{replicate}_{protein}/image/{replicate}_{protein}.info.eps"),
+        #        zip,
+        #        replicate=[r for (r, p) in KPLOGO_PAIRS],
+        #        protein=[p for (r, p) in KPLOGO_PAIRS]),
 
 #rule fastqc:
 #    output: 'qualitycheck/{sample}_L2_1.fastqc.zip'
@@ -262,8 +262,6 @@ rule run_kpLogo:
             cmd.extend(["-max_k", str(params.max_k)])
             cmd.extend(["-minCount", str(params.min_count)])
 
-            # cmd.extend(["-stack_order -1"])
-
             if params.fdr:
                 cmd.append("-FDR")
             else:
@@ -370,7 +368,7 @@ rule clean_all:
         rm -rf {INTERMEDIATE_DIR}
         rm -rf {OUTPUT_DIR}
         rm -rf logs
-        rm done
+        rm -f done
         """
 
 rule clean_out:

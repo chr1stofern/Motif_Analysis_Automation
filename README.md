@@ -64,7 +64,7 @@ This directory contains a minimal version of kpLogo's output, i.e., the .pdf fil
 
 ## Prerequisites
 ### Conda
-Note that this package is designed to be run on a Linux distribution as the kpLogo conda package is installed for linux-64 on the genomedk channel. You may also choose to install kpLogo with other methods, but this is not recommended. Alternatively, if you wish to obtain the logos manually using pLogo's [web server](https://plogo.uconn.edu/), you may refer to the [pLogo Generation with pLogo Web Page](#plogo-generation-with-plogo-web-page) section.
+Note that this package is designed to be run on a Linux distribution as the kpLogo conda package is installed for linux-64 on the genomedk channel. You may also choose to install kpLogo with other methods, but this is not recommended. Alternatively, if you wish to obtain the logos manually using [pLogo's web server](https://plogo.uconn.edu/), you may refer to the [pLogo Generation with pLogo Web Page](#plogo-generation-with-plogo-web-page) section.
 
 We use conda to manage the installation of kpLogo and other packages. Please refer to [Conda's official installation guide](https://docs.conda.io/projects/conda/en/latest/user-guide/index.html) if you do not have Conda installed.
             
@@ -251,11 +251,22 @@ motif_figs:
 If you are using your own data, please change the first indented line (e.g., RfxExample-CR) to your sample names following the {protein/sample}-{type} format (replicate number is not necessary). Then, specify whether the protein recognises a 2nt or 3nt motif in `motif_type:` as `2nt_motif` or `3nt_motif` respectively. n_top specifies the number of top ranked motif(s) you wish to highlight on the plot, and conversely, n_bottom specifies the number of the lowest ranked motif(s) you wish to highlight on the plot. If there are other motifs you wish to highlight but are not among the top and bottom few motifs, you can specify them with the format `highlight: ["motif_string_1", "motif_string_2"]`, e.g., `highlight: ["CT", "GG"]`. `xlim` and `ylim` controls the visible range of the two axes. You may modify them accordingly if some data points clip outside of the figure. Lastly, `out` controls the output path of the figure generated.
 
 ### pLogo Generation with kpLogo Package:
+The generation of motif logos for all samples is automated with the kpLogo package. You may simply run the script without changing any parameters for kpLogo for all data use cases. If you do wish to modify certain parameters, you may do so at the kpLogo block in `config.yaml`. For detailed instructions on using kpLogo, please consult the manual by running `kpLogo` on the terminal (while the [Conda environment](#setting-up-conda-environment) is activated). 
+
+```yaml
+max_k: 1
+min_count: 0
+p_cutoff: 0.05
+fdr: false
+region: null
+weighted: false
+ranked: false
+extra_args: "-plot s -stack_order -1 -pseudo 2.5"
+```
+Please keep the parameter `-pseudo 2.5` unmodified. This adds a "pseudocount" (default = 1.0) during the kpLogo's computation of p-values and prevents it from being 0. Since the NGS sequences contains an extremely large number of sample (reads), the pseudocount is necessary to compensate for the highly deflated p-values.
 
 ### pLogo Generation with pLogo Web Page:
-
-
-
+First open [pLogo generation website](https://plogo.uconn.edu/) on a browser of your choice. Keep the option `remove duplicate sequences` checked for both foreground (left box with the label "1. Paste or upload aligned sequences" on top) and background (the right box with the label "2. Select, upload, or paste a background"). Then, drag and drop the processed and mapped sequences into the appropriate input boxes, or upload them by clicking `choose file`. For example, 1_RfxExample-CR.collapsed.tsv (stored in `intermediate_files/logo_input`) shall be used as the foreground, while 1_RfxExample-NP.collapsed.tsv shall be used as the background. When both foreground and background sequences are approved, click the `generate pLogo` button. You may directly export the generated logo by clicking `Export Image` on the `export` tab. Or, you may also modify other customisation and export file parameters before doing so. If you wish to obtain the raw data of the plot, you may also obtain it by clicking the `Export raw position weight matrix values` button on the `export tab`. For other samples/replicates, repeat the process with the relevant foreground and background files.
 
 ## Running the Script
 To run the entire pipeline, execute the following:
