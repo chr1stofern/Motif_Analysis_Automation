@@ -32,12 +32,14 @@ sample_sheet: "/home/chulfyp1/data/Motif_Analysis_Automation/examples.csv"
 
 ### Dictionary Mapping & Scatter Plot Generation ###
 
-# Set the following four filters to 1 when using example sequences
+# For full data, use 100, 50, 20, 20
+# Set all four filters to 1 when using example sequences
 dict_min_count_rep1: 100
 dict_min_count_rep2: 50
 clv_min_count_rep1: 20
 clv_min_count_rep2: 20
 
+# For full data and example data, use 15, 20
 min_insert_len: 15
 max_insert_len: 25
 
