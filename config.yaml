@@ -37,28 +37,29 @@ sample_sheet: "/home/chulfyp1/data/Motif_Analysis_Automation/examples.csv"
 
 ### Dictionary Mapping & Scatter Plot Generation ###
 
-# For full data, use 100, 50, 20, 20
 # Set all four filters to 1 when using example sequences
-dict_min_count_rep1: 100
-dict_min_count_rep2: 50
-clv_min_count_rep1: 20
-clv_min_count_rep2: 20
+# For full dataset, use 100, 50, 20, 20
+dict_min_count_rep1: 1
+dict_min_count_rep2: 1
+clv_min_count_rep1: 1
+clv_min_count_rep2: 1
 
-# For full data and example data, use 15, 20
+# For example data and full dataset, use 15, 25
 min_insert_len: 15
 max_insert_len: 25
 
-# Set the following to 4000 for full data, 40 for example data
+# Set the following 40 for example data, 4000 for full dataset
 top_n_seq: 40
 
 # Supp-Fig-6a: rank-grouped relative cleavage efficiency
 # The loop below produces one figure per protein sequence pair (CR+NP)
+# separate into the bins [0, 4, 16, 40, .inf] for example data, [0, 400, 1600, 4000, .inf] for full dataset
 supp6a:
-  bins:   [0, 400, 1600, 4000, .inf]      # YAML parses '.inf' as float('inf')
-  labels: ["Top400", "Top401–1600", "Top1601–4000", "The rest"]
+  bins:   [0, 4, 16, 40, .inf]      # YAML parses '.inf' as float('inf')
+  labels: ["Top4", "Top5–16", "Top17–40", "The rest"]
   colors: ["tab:blue", "tab:orange", "tab:green", "tab:red"]
 
-# Fig-2f: motif boxplot + Mann-Whitney vs reference, for one target sample
+# Fig-2f: motif boxplot + Mann-Whitney vs reference, for Psp only
 # fig2f:
 #   target:     "Psp-CR"
 #   motifs:     ["TAT", "TCA", "CAA", "GTT"]
