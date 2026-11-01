@@ -37,6 +37,7 @@ sample_sheet: "/home/chulfyp1/data/Motif_Analysis_Automation/examples.csv"
 
 ### Dictionary Mapping & Scatter Plot Generation ###
 
+# Count Filters
 # Set all four filters to 1 when using example sequences
 # For full dataset, use 100, 50, 20, 20
 dict_min_count_rep1: 1
@@ -44,6 +45,7 @@ dict_min_count_rep2: 1
 clv_min_count_rep1: 1
 clv_min_count_rep2: 1
 
+# Length Filters
 # For example data and full dataset, use 15, 25
 min_insert_len: 15
 max_insert_len: 25
@@ -51,7 +53,7 @@ max_insert_len: 25
 # Set the following 40 for example data, 4000 for full dataset
 top_n_seq: 40
 
-# Output paths of various files can be modified at `out:`
+# Output paths of various files can be modified at `out:` and `out_template:`
 
 # Supp-Fig-3a,b: dictionary depth
 supp3ab:
@@ -76,7 +78,7 @@ supp6a:
   labels: ["Top4", "Top5–16", "Top17–40", "The rest"]
   colors: ["tab:blue", "tab:orange", "tab:green", "tab:red"]
 
-# Fig-2c / Fig-2e: per-sample motif-scatter recipes
+# Fig-2c,e: per-sample motif-scatter recipes
 # plot compares 2 replicates, please comment out if only 1 replicate is involved
 motif_figs:
   RfxExample-CR:
