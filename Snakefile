@@ -19,6 +19,12 @@ os.makedirs(os.path.join(INTERMEDIATE_DIR, "logo_input"), exist_ok=True)
 os.makedirs(LOGO_OUTPUT_DIR, exist_ok=True)
 os.makedirs(os.path.join(OUTPUT_DIR, "motif_plogo"), exist_ok=True)
 
+def out(cfg_entry, key="out"):
+    return os.path.join(OUTPUT_DIR, cfg_entry[key])
+
+def out_template(cfg_entry, key, **fmt):
+    return os.path.join(OUTPUT_DIR, cfg_entry[key].format(**fmt))
+    
 KP_LOGO_ABS = shutil.which("kpLogo")
 if not KP_LOGO_ABS:
     raise Exception("kpLogo not found. Please install and actvivate the environment according to instructions in the README.")
@@ -37,33 +43,25 @@ _cr_proteins = sorted({p for (r, p, t) in PAIRS if t == "CR"})
 
 _has_rep2 = any(r == "2" for (r, _, _) in PAIRS)
 
-REP_FIGS = [
-    f'{OUTPUT_DIR}/supp_fig/supp4a_rep1_clv_depth.pdf',
-    f'{OUTPUT_DIR}/supp_fig/supp5a_rep1_clv_eff.pdf',
-]
+_supp3ab = out(config["supp3ab"])
+_supp4a  = out(config["supp4a"])
+_supp4b  = out(config["supp4b"])
+_supp5a  = out(config["supp5a"])
+_supp5b  = out(config["supp5b"])
+
+_supp6a = [out_template(config["supp6a"], "out_template", protein=p)
+           for p in _cr_proteins]
+
+_motif  = [os.path.join(OUTPUT_DIR, v["out"]) for v in config["motif_figs"].values()]
+
+_fig2f  = [out(config["fig2f"], "out"),
+           out(config["fig2f"], "stats_out")] if config.get("fig2f") else []
+
+_mapped = out(config["mapped_clv_table"])
+
+REP_FIGS = [_supp4a, _supp5a]
 if _has_rep2:
-    REP_FIGS += [
-        f'{OUTPUT_DIR}/supp_fig/supp4b_rep2_clv_depth.pdf',
-        f'{OUTPUT_DIR}/supp_fig/supp5b_rep2_clv_eff.pdf',
-    ]
-
-SUPP6A_OUTS = [
-    f'{OUTPUT_DIR}/supp_fig/supp6a_{p}_clv-eff.pdf'
-    for p in _cr_proteins
-]
-
-MOTIF_OUTS = [
-    f'{OUTPUT_DIR}/main_fig/{v["out"]}'
-    for v in MOTIF_FIGS.values()
-]
-
-FIG2F_OUTS = (
-    [
-        f'{OUTPUT_DIR}/main_fig/{FIG2F["out"]}',
-        f'{OUTPUT_DIR}/main_fig/{FIG2F["stats_out"]}',
-    ]
-    if FIG2F else []
-)
+    REP_FIGS += [_supp4b, _supp5b]
 
 MIN_QUAL = 30
 MIN_QUALIFIED = 90
@@ -86,33 +84,31 @@ rule all:
                protein=[p for (_, p, _) in PAIRS],
                type=[t for (_, _, t) in PAIRS]),
 
-        # per-replicate depth / efficiency figures (unchanged)
-        f'{OUTPUT_DIR}/supp_fig/supp3ab_dict_depth.pdf',
+        # per-replicate depth / efficiency figures
+        _supp3ab,
         *REP_FIGS,
+
+        # Supp-6a: one per CR protein
+        *_supp6a,
+
+        # Fig-2c / Fig-2e: one per motif_figs entry
+        *_motif,
+
+        # Fig-2f: boxplot + Mann-Whitney table
+        *_fig2f,
+
+        # kpLogo outputs
+        expand(os.path.join(LOGO_OUTPUT_DIR,
+                            "{replicate}_{protein}/image/{replicate}_{protein}.info.eps"),
+               zip,
+               replicate=[r for (r, p) in KPLOGO_PAIRS],
+               protein=[p for (r, p) in KPLOGO_PAIRS]),
+
         # plogo PDFs
         expand(f'{OUTPUT_DIR}/motif_plogo/{{replicate}}_{{protein}}.plogo.pdf',
                zip,
                replicate=[r for (r, p) in KPLOGO_PAIRS],
                protein=[p for (r, p) in KPLOGO_PAIRS]),
-
-        # Supp-6a: one per CR protein
-        SUPP6A_OUTS,
-
-        # Fig-2c / Fig-2e: one per motif_figs entry
-        MOTIF_OUTS,
-
-        # Fig-2f: boxplot + Mann-Whitney table
-        FIG2F_OUTS,
-
-        # full mapped table
-        f'{OUTPUT_DIR}/mapped_clv_seq_full.xlsx',
-
-        # # kpLogo outputs
-        # expand(os.path.join(LOGO_OUTPUT_DIR,
-        #                     "{replicate}_{protein}/image/{replicate}_{protein}.info.eps"),
-        #        zip,
-        #        replicate=[r for (r, p) in KPLOGO_PAIRS],
-        #        protein=[p for (r, p) in KPLOGO_PAIRS]),
 
 #rule fastqc:
 #    output: 'qualitycheck/{sample}_L2_1.fastqc.zip'
@@ -160,6 +156,7 @@ rule convert_to_tsv:
 # Call generate_plots.py
 rule generate_plots:
     input:
+        "config.yaml",
         expand(f'{PPSEQ_DIR}/{{replicate}}_{{protein}}-{{type}}.collapsed.tsv',
                zip,
                replicate=[r for (r, _, _) in PAIRS],
@@ -167,12 +164,12 @@ rule generate_plots:
                type=[t for (_, _, t) in PAIRS]),
         config["sample_sheet"],
     output:
-        f'{OUTPUT_DIR}/supp_fig/supp3ab_dict_depth.pdf',
+        _supp3ab,
         *REP_FIGS,
-        SUPP6A_OUTS,
-        MOTIF_OUTS,
-        FIG2F_OUTS,
-        f'{OUTPUT_DIR}/mapped_clv_seq_full.xlsx',
+        *_supp6a,
+        *_motif,
+        *_fig2f,
+        _mapped,
         expand(f'{INTERMEDIATE_DIR}/logo_input/{{replicate}}_{{protein}}-{{type}}.txt',
                zip,
                replicate=[r for (r, _, t) in PAIRS if t != "DT"],

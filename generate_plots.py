@@ -36,6 +36,10 @@ def display_name(sClvName):
     typ_disp = {'NP': 'noProtein', 'CR': 'withProtein', 'DT': 'dict'}[typ]
     return f'{prot}-{typ_disp}'
 
+def _sample_key(sClvName):
+    # '1_Lbu-NP' -> 'Lbu-NP'
+    return sClvName.split('_', 1)[1]
+
 # at the top of generate_plots.py
 try:
     cfg_path = snakemake.params.config_path
@@ -61,8 +65,13 @@ os.makedirs(os.path.join(sOutputDir, "supp_fig"), exist_ok=True)
 logo_input_dir = os.path.join(cfg.get("intermediate_dir", "intermediate_files"), "logo_input")
 os.makedirs(logo_input_dir, exist_ok=True)
 
-### Manifest-derived replication structure ###
 REPS = sorted(m["replicate"].unique())                 # e.g. ['1'] or ['1', '2']
+
+def out(cfg_entry, key="out"):
+    return os.path.join(sOutputDir, cfg_entry[key])
+
+def out_template(cfg_entry, key, **fmt):
+    return os.path.join(sOutputDir, cfg_entry[key].format(**fmt))
 
 # per-replicate cleavage sample lists (only replicates that actually have non-DT rows)
 lClvFiles = {rep: m[(m.replicate == rep) & (m.type != "DT")]["file"].tolist()
@@ -88,7 +97,14 @@ lNames2   = [m[(m.replicate == "2") & (m.file == f)]["label"].iloc[0] for f in l
 sDictFile1 = dict_files.get("1")
 sDictFile2 = dict_files.get("2")
 
-### Process Dictionary; Supp-Fig-3a,b | Sequencing Depth of Dictionary ###
+print("\n\n\n")
+
+
+
+
+
+### Load Dictionary Sequences (Wrapper) ###
+
 def _load_dict(path, filt):
     if path is None:
         return None
@@ -96,6 +112,10 @@ def _load_dict(path, filt):
     df['count'] = df['name'].apply(lambda x: int(x.split('-')[-1]))
     df = df[df['count'] > filt]
     return df
+
+### Load Dictionary Sequences (Function Call) ###
+
+print("Loading Dictionary")
 
 dfDict1 = _load_dict(sDictFile1, nDictCountFilter1)
 dfDict2 = _load_dict(sDictFile2, nDictCountFilter2)
@@ -109,6 +129,14 @@ for label, df, filt in [("Rep1", dfDict1, nDictCountFilter1),
               f"{len(df)} unique 35mers, "
               f"total depth {df['count'].sum()}, "
               f"median {df['count'].median()}")
+
+print("\n\n\n")
+
+
+
+### Process Dictionary; Supp-Fig-3a,b | Sequencing Depth of Dictionary ###
+
+print("Producing Supp-Fig-3a,b")
 
 _panels = []
 if dfDict1 is not None:
@@ -132,10 +160,14 @@ for ax, (df, filt, title) in zip(axes[0], _panels):
     ax.yaxis.set_major_formatter(ScalarFormatter())
 
 plt.tight_layout()
-plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp3ab_dict_depth.pdf'), dpi=1200)
+plt.savefig(out(cfg["supp3ab"]), dpi=1200)
 plt.close()
 
-### Map Cleavage Fragments to Dictionary ###
+print("\n\n\n")
+
+
+
+### Map Cleavage Fragments to Dictionary (Wrapper) ###
 
 def map_replicate(label_rep, clv_files, df_dict,
                   n_clv_count_filter,
@@ -172,15 +204,15 @@ def map_replicate(label_rep, clv_files, df_dict,
         mapped.append([label_rep, sClvName, dfClvConcat])
     return mapped
 
+### Map Cleavage Fragments to Dictionary (Function Call) ###
+
+print("Mapping Cleavage Sequences")
+
 lMappedClv1 = (map_replicate('Rep1', lClvFile1, dfDict1, nClvCountFilter1)
                if dfDict1 is not None and lClvFile1 else [])
 lMappedClv2 = (map_replicate('Rep2', lClvFile2, dfDict2, nClvCountFilter2)
                if dfDict2 is not None and lClvFile2 else [])
 lAllMappedClv = lMappedClv1 + lMappedClv2 
-
-def _sample_key(sClvName):
-    # '1_Lbu-NP' -> 'Lbu-NP'
-    return sClvName.split('_', 1)[1]
 
 by_key1 = {_sample_key(n): (rep, n, df) for (rep, n, df) in lMappedClv1}
 by_key2 = {_sample_key(n): (rep, n, df) for (rep, n, df) in lMappedClv2}
@@ -192,14 +224,20 @@ if missing2: print(f'missing in Rep1: {missing2}')
 
 lZipMappedClv = [(by_key1[k], by_key2[k]) for k in sorted(by_key1.keys() & by_key2.keys())]
 
-print("Printing: lMappedClv1")
+print("Printing: lMappedClv1\n")
 print(lMappedClv1)
 print("\n\n\n")
-print("Printing: lMappedClv2")
+print("Printing: lMappedClv2\n")
 print(lMappedClv2)
 print("\n\n\n")
 
+print("\n\n\n")
+
+
+
 ### Supp-Fig-4a | Sequencing Depth of Cleavage Libraries (distribution of reads per sequence; mapped reads on dictionary) — Rep1 ###
+
+print("Producing Supp-Fig-5a")
 
 fig = plt.figure(figsize=(10, 8))
 for i, (sLabelRep, sClvName, dfClvConcat) in enumerate(lMappedClv1):
@@ -217,10 +255,16 @@ for i, (sLabelRep, sClvName, dfClvConcat) in enumerate(lMappedClv1):
 
 plt.tight_layout()
 plt.suptitle('Rep1', y=0.99)
-plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp4a_rep1_clv_depth.pdf'), dpi=1200)
+plt.savefig(out(cfg["supp4a"]), dpi=1200)
 plt.close()
 
+print("\n\n\n")
+
+
+
 ### Supp-Fig-4b | Sequencing Depth of Cleavage Libraries (distribution of reads per sequence; mapped reads on dictionary) — Rep2 ###
+
+print("Producing Supp-Fig-5b")
 
 if lMappedClv2:
     fig = plt.figure(figsize=(10, 8))
@@ -239,12 +283,18 @@ if lMappedClv2:
 
     plt.tight_layout()
     plt.suptitle('Rep2', y=0.99)
-    plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp4b_rep2_clv_depth.pdf'), dpi=1200)
+    plt.savefig(out(cfg["supp4b"]), dpi=1200)
     plt.close()
 else:
     print("no Rep2 — skipping Supp-Fig-4b")
 
+print("\n\n\n")
+
+
+
 ### Supp-Fig-5a | Distribution of relative cleavage efficiencies of cleaved sequences — Rep1 ###
+
+print("Producing Supp-Fig-5a")
 
 fig = plt.figure(figsize=(10, 8))
 for i, (sLabelRep, sClvName, dfClvConcat) in enumerate(lMappedClv1):
@@ -258,10 +308,16 @@ for i, (sLabelRep, sClvName, dfClvConcat) in enumerate(lMappedClv1):
 
 plt.tight_layout()
 plt.suptitle('Rep1', y=0.99)
-plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp5a_rep1_clv_eff.pdf'), dpi=1200)
+plt.savefig(out(cfg["supp5a"]), dpi=1200)
 plt.close()
 
+print("\n\n\n")
+
+
+
 ### Supp-Fig-5b | Distribution of relative cleavage efficiencies of cleaved sequences — Rep2 ###
+
+print("Producing Supp-Fig-5b")
 
 if lMappedClv2:
     fig = plt.figure(figsize=(10, 8))
@@ -276,12 +332,18 @@ if lMappedClv2:
 
     plt.tight_layout()
     plt.suptitle('Rep2', y=0.99)
-    plt.savefig(os.path.join(sOutputDir, 'supp_fig', 'supp5b_rep2_clv_eff.pdf'), dpi=1200)
+    plt.savefig(out(cfg["supp5b"]), dpi=1200)
     plt.close()
 else:
     print("no Rep2 — skipping Supp-Fig-5b")
-    
+
+print("\n\n\n")
+
+
+
 ### Supp-Fig-6a | Cleavage efficiency by rank group — one figure per CR sample ###
+
+print("Producing Supp-Fig-6a")
 
 S6A_BINS   = cfg["supp6a"]["bins"]
 S6A_LABELS = cfg["supp6a"]["labels"]
@@ -324,11 +386,14 @@ for prot in cr_proteins:
         ax.set_ylabel('Relative cleavage efficiency')
 
     plt.tight_layout(rect=[0, 0, 1, 0.95])
-    plt.savefig(os.path.join(sOutputDir, 'supp_fig',
-                             f'supp6a_{prot}_clv-eff.pdf'), dpi=1200)
+    plt.savefig(out_template(cfg["supp6a"], "out_template", protein=prot), dpi=1200)
     plt.close()
 
-### Fig-2c,e | Motif-Cleavage Efficiency Distribution ###
+print("\n\n\n")
+
+
+
+### Fig-2c,e | Motif-Cleavage Efficiency Distribution (Wrapper) ###
 
 def plot_motif_scatter(mapped_pairs, target, motif_type,
                        n_top, n_bottom, xlim, ylim, out_path,
@@ -393,7 +458,17 @@ def plot_motif_scatter(mapped_pairs, target, motif_type,
                         row['mean_clvOverDict_rep2'] + 0.02,
                         row[motif_type],
                         fontsize=10, fontweight='bold', color=color, ha='left', va='bottom')
-
+        
+        print("Sample: ", {sSampleName})
+        print("Rep 1: Min Eff")
+        print(merged['mean_clvOverDict_rep1'].min())
+        print("Rep 1: Max Eff")
+        print(merged['mean_clvOverDict_rep1'].max())
+        print("Rep 2: Min Eff")
+        print(merged['mean_clvOverDict_rep2'].min())
+        print("Rep 2: Max Eff")
+        print(merged['mean_clvOverDict_rep2'].max())
+        
         ax.set_xlim(xlim); ax.set_ylim(ylim)
         ax.set_xlabel('Rep 1', fontsize=8); ax.set_ylabel('Rep 2', fontsize=8)
         ax.set_title(f'{sSampleName} mean clv/dict', fontsize=8)
@@ -405,10 +480,11 @@ def plot_motif_scatter(mapped_pairs, target, motif_type,
         return
     raise ValueError(f'target {target!r} not found in mapped_pairs')
 
-### Fig-2c / Fig-2e | Motif-Cleavage Efficiency Distribution ###
+### Fig-2c,e | Function Call ###
 
+print("Producing Fig-2c,e")
 MOTIF_FIGS = cfg.get("motif_figs") or {}
-
+    
 for target, p in MOTIF_FIGS.items():
     plot_motif_scatter(
         lZipMappedClv, target,
@@ -417,12 +493,16 @@ for target, p in MOTIF_FIGS.items():
         n_bottom        = p["n_bottom"],
         xlim            = p["xlim"],
         ylim            = p["ylim"],
-        out_path        = os.path.join(sOutputDir, "main_fig", p["out"]),
-        highlight_motif = p.get("highlight"),           # None if key absent or null
+        out_path        = out(p),
+        highlight_motif = p.get("highlight"),  # None if key absent or null
     )
+print("\n\n\n")
+
+
 
 ### Fig-2f | Motif-cleavage efficiency vs reference, for one target sample ###
 
+print("Producing Fig-2f")
 f2f = cfg.get("fig2f")
 
 if f2f:
@@ -484,23 +564,28 @@ if f2f:
 
     ax.set_xlabel('')
     plt.tight_layout(rect=[0, 0, 1, 0.95])
-    plt.savefig(os.path.join(sOutputDir, 'main_fig', f2f["out"]), dpi=1200)
+    plt.savefig(out(cfg["fig2f"], "out"), dpi=1200)
     plt.close()
 
     # export mann whitney test data
 
-    stats_path = os.path.join(sOutputDir, 'main_fig', f2f["stats_out"])
-    pd.DataFrame(stats_rows).to_csv(stats_path, sep='\t', index=False)
+    stats_path = out(cfg["fig2f"], "stats_out")
+    pd.DataFrame(stats_rows).to_csv(stats_path, sep="\t", index=False)
     print(f'wrote {stats_path}')
 else:
     print("fig2f is null; skipping Fig-2f")
+print("\n\n\n")
+
+
     
 ### Generate pLogo/kpLogo Foreground Input Sequences (Top 4000) ###
 ### Export Entire Mapped Table ###
 ### Write tables (pLogo input + full mapped table) ###
 
+print("Exporting Mapped Sequences & kpLogo Input")
+
 # sOutputTopSequences = os.path.join(logo_input_dir, 'Top_4000_Seq.xlsx')
-sOutputMappedClv    = os.path.join(sOutputDir, 'mapped_clv_seq_full.xlsx')
+sOutputMappedClv = out(cfg["mapped_clv_table"])
 
 with pd.ExcelWriter(sOutputMappedClv,    engine='xlsxwriter') as f2:
 # pd.ExcelWriter(sOutputTopSequences, engine='xlsxwriter') as f1, \
@@ -527,3 +612,5 @@ with pd.ExcelWriter(sOutputMappedClv,    engine='xlsxwriter') as f2:
         dfClvConcat.to_excel(f2, sheet_name=sOutputName, index=False)
 
         print(sOutputName)
+
+print("\n\n\n")

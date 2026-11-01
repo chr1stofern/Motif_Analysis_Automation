@@ -117,6 +117,8 @@ This package can be used in one of 3 ways: with example sequences, with the full
 
 The example sequences are already included in the repository, and are obtained by running the command `awk 'NR % 10 == 0' {ORIGINAL_SEQ.collapsed.tsv} > {EXAMPLE_SEQ.collapsed.tsv}` on RfxCas13d and dictionary sequences.
 
+awk -v seed=111 'BEGIN{srand(seed)} {if (NR % 10 == 1) pick = int(rand()*10) + 1} NR % 10 == pick' {ORIGINAL_SEQ.collapsed.tsv} > {EXAMPLE_SEQ.collapsed.tsv}
+
 To download the raw NGS data (deposited in the NCBI Gene Expression Omnibus, GEO, under the accession number GSE313507) necessary for reproducing figures in our publication, please add execution rights to the download script by running: `chmod +x ./fetch_raw.sh`, then run the bash script fetch_raw.sh with the syntax:
 ```bash
 ./fetch_raw.sh <full/path/to/samples.csv> <full/path/to/input_dir>
@@ -261,7 +263,7 @@ fdr: false
 region: null
 weighted: false
 ranked: false
-extra_args: "-plot s -stack_order -1 -pseudo 2.5"
+extra_args: "-plot s -stack_order -1 -fix 1.1 -pseudo 2.5"
 ```
 Please keep the parameter `-pseudo 2.5` unmodified. This adds a "pseudocount" (default = 1.0) during the kpLogo's computation of p-values and prevents it from being 0. Since the NGS sequences contains an extremely large number of sample (reads), the pseudocount is necessary to compensate for the highly deflated p-values.
 
