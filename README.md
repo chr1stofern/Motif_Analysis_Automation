@@ -117,8 +117,6 @@ This package can be used in one of 3 ways: with example sequences, with the full
 
 The example sequences are already included in the repository, and are obtained by running the command `awk 'NR % 10 == 0' {ORIGINAL_SEQ.collapsed.tsv} > {EXAMPLE_SEQ.collapsed.tsv}` on RfxCas13d and dictionary sequences.
 
-awk -v seed=111 'BEGIN{srand(seed)} {if (NR % 10 == 1) pick = int(rand()*10) + 1} NR % 10 == pick' {ORIGINAL_SEQ.collapsed.tsv} > {EXAMPLE_SEQ.collapsed.tsv}
-
 To download the raw NGS data (deposited in the NCBI Gene Expression Omnibus, GEO, under the accession number GSE313507) necessary for reproducing figures in our publication, please add execution rights to the download script by running: `chmod +x ./fetch_raw.sh`, then run the bash script fetch_raw.sh with the syntax:
 ```bash
 ./fetch_raw.sh <full/path/to/samples.csv> <full/path/to/input_dir>
@@ -175,25 +173,7 @@ After all sequences are mapped to the dictionary, the sequences are ranked based
 **Parameters for Supp. Fig. 6a:**
 The grouping of ranked motifs into separate bins can be modified to your liking. In the publication, we separated the motifs into the top 0-400 (top 400) ranked motifs, the top 401-1600, the top 1601-4000, and the remaining (4001-infinity). The actual grouping of data can be modified at `bins:` in the `supp6a:` section of config.yaml. For the full data, we write `bins:   [0, 400, 1600, 4000, .inf]` where .inf denotes infinity. To change the labels along the x-axis of the figure, modify the second parameter `labels:`. To change the colour of individual boxes for each group, modify `colors:`.
 
-**Parameters for Fig. 2f:**
-This figure is only generated for PspCas13b. When using the full dataset, make sure the following block in `config.yaml` remains uncommented:
-```yaml
-fig2f:
-  target:     "Psp-CR"
-  motifs:     ["TAT", "TCA", "CAA", "GTT"]
-  reference:  "GTT"
-  rep1_ylim:  [0, 1]
-  rep2_ylim:  [0, 6]
-  out:        "fig2f_psp_clv-eff.pdf"
-  stats_out:  "fig2_psp_mann-whitney.tsv"
-```
-Otherwise, when using the example data, comment it out and replace the block with/add the line: 
-```yaml
-fig2f: null
-```
-If you wish to construct this plot for your own data, please modify `target:` to select the desired sample for analysis. To select other motifs relevant for your protein, please modify `motifs:`. The `reference:` motif specifies the motif that the target `motifs:` will be tested against for significance. `rep1_ylim:` and `rep2_ylim:` controls the height of the y-axis of the plot for replicate 1 and replicate 2 respectively. You may also modify the output path of the figure with `out:`. Finally, an additional .tsv file containing the significance values (obtained from the Mann–Whitney U test of the motifs) will also be exported. Again, you may modify the output path of this data file via `stats_out:`.
-
-**Parameters for Fig. 2c/e:**
+**Parameters for Fig. 2c,e:**
 Since Fig. 2c/e plots the cleavage efficiencies of both replicates 1 and 2, please comment out the entire indented section following `motif_figs:` (comment `motif_figs:` itself as well). If using the full dataset, you may use the following setup:
 ```yaml
 motif_figs:
@@ -204,7 +184,7 @@ motif_figs:
     highlight: null
     xlim: [0.1, 0.37]
     ylim: [0.4, 1.9]
-    out: fig2c_lbu_motif-clv-eff.pdf
+    out: main_fig/fig2c_lbu_motif-clv-eff.pdf
   Lwa-CR:
     motif_type: 2nt_motif
     n_top: 3
@@ -212,7 +192,7 @@ motif_figs:
     highlight: "CT"
     xlim: [0.22, 0.6]
     ylim: [0.9, 1.9]
-    out: fig2c_lwa_motif-clv-eff.pdf
+    out: main_fig/fig2c_lwa_motif-clv-eff.pdf
   Bt3-CR:
     motif_type: 2nt_motif
     n_top: 1
@@ -220,7 +200,7 @@ motif_figs:
     highlight: null
     xlim: [0.2, 0.45]
     ylim: [0.75, 2.45]
-    out: fig2c_bt3_motif-clv-eff.pdf
+    out: main_fig/fig2c_bt3_motif-clv-eff.pdf
   Rfx-CR:
     motif_type: 2nt_motif
     n_top: 1
@@ -228,7 +208,7 @@ motif_figs:
     highlight: null
     xlim: [0.3, 0.56]
     ylim: [0.65, 2.9]
-    out: fig2c_rfx_motif-clv-eff.pdf
+    out: main_fig/fig2c_rfx_motif-clv-eff.pdf
   Psp-CR:
     motif_type: 3nt_motif
     n_top: 7
@@ -236,21 +216,39 @@ motif_figs:
     highlight: null
     xlim: [0.15, 0.47]
     ylim: [0.8, 2.8]
-    out: fig2e_psp_motif-clv-eff.pdf
+    out: main_fig/fig2e_psp_motif-clv-eff.pdf
 ```
 If using the example data, replace the block with:
 ```yaml
-motif_figs:
   RfxExample-CR:
     motif_type: 2nt_motif
     n_top: 1
     n_bottom: 0
     highlight: null
-    xlim: [0.3, 0.56]
-    ylim: [0.65, 2.9]
-    out: fig2c_rfx_motif-clv-eff.pdf
+    xlim: [0.2, 17]
+    ylim: [1, 12]
+    out: main_fig/fig2c_rfx_motif-clv-eff.pdf
 ```
-If you are using your own data, please change the first indented line (e.g., RfxExample-CR) to your sample names following the {protein/sample}-{type} format (replicate number is not necessary). Then, specify whether the protein recognises a 2nt or 3nt motif in `motif_type:` as `2nt_motif` or `3nt_motif` respectively. n_top specifies the number of top ranked motif(s) you wish to highlight on the plot, and conversely, n_bottom specifies the number of the lowest ranked motif(s) you wish to highlight on the plot. If there are other motifs you wish to highlight but are not among the top and bottom few motifs, you can specify them with the format `highlight: ["motif_string_1", "motif_string_2"]`, e.g., `highlight: ["CT", "GG"]`. `xlim` and `ylim` controls the visible range of the two axes. You may modify them accordingly if some data points clip outside of the figure. Lastly, `out` controls the output path of the figure generated.
+If you are using your own data, please change the first indented line (e.g., RfxExample-CR) to your sample names following the {protein/sample}-{type} format (replicate number is not necessary). Then, specify whether the protein recognises a 2nt or 3nt motif in `motif_type:` as `2nt_motif` or `3nt_motif` respectively. n_top specifies the number of top ranked motif(s) you wish to highlight on the plot, and conversely, n_bottom specifies the number of the lowest ranked motif(s) you wish to highlight on the plot. If there are other motifs you wish to highlight but are not among the top and bottom few motifs, you can specify them with the format `highlight: ["motif_string_1", "motif_string_2"]`, e.g., `highlight: ["CT", "GG"]`. `xlim` and `ylim` controls the visible range of the two axes. You may modify them accordingly if some data points clip outside of the figure. Lastly, configure the output path and file name with `out`.
+
+**Parameters for Fig. 2f:**
+This figure is only generated for PspCas13b. When using the full dataset, uncomment the line `fig2f: null` and add the following block in `config.yaml`:
+```yaml
+Fig-2f: motif boxplot + Mann-Whitney vs reference, for Psp only
+fig2f:
+  target:     "Psp-CR"
+  motifs:     ["TAT", "TCA", "CAA", "GTT"]
+  reference:  "GTT"
+  rep1_ylim:  [0, 1]
+  rep2_ylim:  [0, 6]
+  out:        main_fig/fig2f_psp_clv-eff.pdf
+  stats_out:  main_fig/fig2_psp_mann-whitney.tsv
+```
+Otherwise, when using the example data, check that the following line is uncommented: 
+```yaml
+fig2f: null
+```
+If you wish to construct this plot for your own data, please modify `target:` to select the desired sample for analysis. To select other motifs relevant for your protein, please modify `motifs:`. The `reference:` motif specifies the motif that the target `motifs:` will be tested against for significance. `rep1_ylim:` and `rep2_ylim:` controls the height of the y-axis of the plot for replicate 1 and replicate 2 respectively. You may also modify the output path of the figure with `out:`. Finally, an additional .tsv file containing the significance values (obtained from the Mann–Whitney U test of the motifs) will also be exported. Again, you may modify the output path of this data file via `stats_out:`.
 
 ### pLogo Generation with kpLogo Package:
 The generation of motif logos for all samples is automated with the kpLogo package. You may simply run the script without changing any parameters for kpLogo for all data use cases. If you do wish to modify certain parameters, you may do so at the kpLogo block in `config.yaml`. For detailed instructions on using kpLogo, please consult the manual by running `kpLogo` on the terminal (while the [Conda environment](#setting-up-conda-environment) is activated). 
