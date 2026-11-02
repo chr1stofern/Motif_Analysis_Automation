@@ -13,7 +13,7 @@ input_dir: "input"
 intermediate_dir: "intermediate_files"
 # intermediate output files will be exported here
 
-preprocessed_seq_dir: "preprocessed_sequences"
+preprocessed_seq_dir: "preprocessed_example_sequences"
 # preprocessed-seq_dir is located inside intermediate_dir for storing preprocessed and collapsed sequences in .tsv format
 
 output_dir: "output"

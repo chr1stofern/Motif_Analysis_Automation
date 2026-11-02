@@ -117,7 +117,7 @@ If you are using your own data, please locate the configuration file `config.yam
 ### Setting Up Samples:
 This package can be used in one of 3 ways: with an example subset, with the full dataset from which we produced the figures for our previous publication, and with your own data.
 
-The example sequences are included as a compressed .zip file under <program_repo>/intermediate_files/preprocessed_sequences.zip. These sequences make up a subset of the preprocessed intermediates of the full dataset. In particular, the preprocessed `.collapsed.tsv` of LwaCas13a cleavage samples and the dictionary samples for both replicates. Before proceeding, unzip the file in the same directory (intermediate_files) and check that the folder produced is named as `preprocessed_sequences`. Do not place the folder elsewhere for this use case.
+The example sequences are included as a compressed .zip file under <program_repo>/intermediate_files/preprocessed_sequences.zip. These sequences make up a subset of the preprocessed intermediates of the full dataset. In particular, the preprocessed `.collapsed.tsv` of LwaCas13a cleavage samples and the dictionary samples for both replicates. Before proceeding, unzip the file in the same directory (intermediate_files) and check that the folder produced is named as `preprocessed_example_sequences`. Do not place the folder elsewhere for this use case.
 
 To download the full dataset (deposited in the NCBI Gene Expression Omnibus, GEO, under the accession number GSE313507) necessary for reproducing figures in our publication, please add execution rights to the download script by running: `chmod +x ./fetch_raw.sh`, then run the bash script fetch_raw.sh with the syntax:
 ```bash
@@ -164,12 +164,13 @@ Note that we use different values for `dict_min_count_rep1` and `dict_min_count_
 
 **Length Filters:**
 - `min_insert_len`: minimum length of a particular sequence in the cleavage sample for it to be filtered in
-- `max_insert_len`: maximum length of a particular sequence in the cleavage sample for it to be filtered in
+- `max_insert_len`: maximum length of a particular sequence in the cleavage sample for it to be filtered in\
+
 The final processed sequence (insert) to be mapped to the dictionary must be equal to or longer than the `min_insert_len`, and shorter than the `max_insert_len` before proceeding.
 For processing our example dataset, or full dataset, keep the parameters as is. For processing your own data, please adjust them accordingly.
 
 **Rank Filter:**
-After all sequences are mapped to the dictionary, the sequences are ranked based on their relative cleavage efficiency, and only the top 4000 sequences are taken for pLogo visualisation for our full data. This can be controlled by the parameter `top_n_seq` in `my_config.yaml`, and it also changes the line drawn in the plot of relative cleavage efficiency against their ranking (supp. fig. 5) for ease of reference. Please adjust the value accordingly for your own data.
+After all sequences are mapped to the dictionary, the sequences are ranked based on their relative cleavage efficiency, and only the top 4000 sequences are taken for pLogo visualisation for our full data. This can be controlled by the parameter `top_n_seq` in `my_config.yaml`, and it also changes the line drawn in the plot of relative cleavage efficiency against their ranking (supp. fig. 5) for ease of reference. Please adjust the value accordingly for your own data. You may first run the program with an arbitrary value, then inspect the resulting Supplementary Figure 5 to see where efficiency starts to level off. Choose a value near this point. 
 
 **Parameters for Supp. Fig. 6a:**
 The grouping of ranked motifs into separate bins can be modified to your liking. In the publication, we separated the motifs into the top 0-400 (top 400) ranked motifs, the top 401-1600, the top 1601-4000, and the remaining (4001-infinity). The actual grouping of data can be modified at `bins:` in the `supp6a:` section of `my_config.yaml`. For the full data, we write `bins:   [0, 400, 1600, 4000, .inf]` where .inf denotes infinity. To change the labels along the x-axis of the figure, modify the second parameter `labels:`. To change the colour of individual boxes for each group, modify `colors:`.
@@ -188,7 +189,7 @@ This figure is only generated for PspCas13b when using the full dataset. If you 
 
 To select other motifs relevant for your protein, please modify `motifs:`. The `reference:` motif specifies the motif that the target `motifs:` will be tested against for significance. 
 
-`rep1_ylim:` and `rep2_ylim:` controls the height of the y-axis of the plot for replicate 1 and replicate 2 respectively. A .tsv file containing the significance values (obtained from the Mann–Whitney U test of the motifs) will also be exported. You may refer to the pre-built `example_config.yaml` and `full_config.yaml` as examples.
+`rep1_ylim:` and `rep2_ylim:` controls the height of the y-axis of the plot for replicate 1 and replicate 2 respectively. A .tsv file containing the significance values (obtained from the Mann–Whitney U test of the motifs) will also be exported. You may refer to the relevant part in the pre-built “example_config.yaml” and “full_config.yaml” as examples.
 
 ### pLogo Generation with kpLogo Package:
 The generation of motif logos for all samples is automated with the kpLogo package. You may simply run the script without changing any parameters for kpLogo for all data use cases. If you do wish to modify certain parameters, you may do so at the kpLogo block in `config.yaml`. For detailed instructions on using kpLogo, please consult the package manual by running `kpLogo` on the terminal (while the [Conda environment](#setting-up-conda-environment) is activated). 
