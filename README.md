@@ -112,7 +112,7 @@ uv sync
 ### Configuring Input & Output Directories/Files:
 If you are testing the example subset or the full dataset (more in the next section), need not modify any files. Simply move on to the next section. However, for the full dataset, please Please make sure the cloned directory has sufficient storage (at least 100 GB).
 
-If you are using your own data, please locate the configuration file `config.yaml` and modify the parameters `input_dir`, `intermediate_dir` and `output_dir` to point to directories of your liking. Again, make sure these locations have sufficient storage. You may also modify the names of `preprocessed_seq_dir` and `output_dir` if you wish. But they will still be produced under the same parent directory.
+If you are using your own data, please locate the configuration file `config.yaml` and modify the parameters `input_dir`, `intermediate_dir` and `output_dir` to point to directories of your liking. Again, make sure these locations have sufficient storage. You may also modify the names of `preprocessed_seq_dir` and `output_dir` if you wish. But they will still be produced under the same parent directory. Note that both relative paths (without "./", see the file for examples) and full paths are allowed, although full paths are recommended.
 
 ### Setting Up Samples:
 This package can be used in one of 3 ways: with an example subset, with the full dataset from which we produced the figures for our previous publication, and with your own data.

@@ -24,14 +24,11 @@ def out(cfg_entry, key="out"):
 
 def out_template(cfg_entry, key, **fmt):
     return os.path.join(OUTPUT_DIR, cfg_entry[key].format(**fmt))
-
+    
 KP_LOGO_ABS = shutil.which("kpLogo")
-KP_LOGO_AVAILABLE = KP_LOGO_ABS is not None
-
-if KP_LOGO_AVAILABLE:
-    print(f"Using kpLogo at: {KP_LOGO_ABS}")
-else:
-    print("WARNING: kpLogo not found. Skipping kpLogo and plogo outputs.")
+if not KP_LOGO_ABS:
+    raise Exception("kpLogo not found. Please install and actvivate the environment according to instructions in the README.")
+print(f"Using kpLogo at: {KP_LOGO_ABS}")
 
 meta = pd.read_csv(config["sample_sheet"], dtype={"replicate": str}).set_index(["replicate", "protein", "type"])
 PAIRS = list(meta.index)
@@ -78,15 +75,6 @@ STAMP = '========== NEW RUN at %s ==========\n' % time.time()
 logf.write(STAMP)
 logf.close()
 
-_kplogo_targets = []
-if KP_LOGO_AVAILABLE:
-    _kplogo_targets = [
-        expand(os.path.join(LOGO_OUTPUT_DIR, "{replicate}_{protein}/image/{replicate}_{protein}.info.eps"),
-               zip, replicate=[r for (r, p) in KPLOGO_PAIRS], protein=[p for (r, p) in KPLOGO_PAIRS]),
-        expand(f'{OUTPUT_DIR}/motif_plogo/{{replicate}}_{{protein}}.plogo.pdf',
-               zip, replicate=[r for (r, p) in KPLOGO_PAIRS], protein=[p for (r, p) in KPLOGO_PAIRS]),
-    ]
-    
 rule all:
     input:
         f'logs/{DATE}.log',
@@ -109,10 +97,18 @@ rule all:
         # Fig-2f: boxplot + Mann-Whitney table
         *_fig2f,
 
-        _mapped
-        
         # kpLogo outputs
-        *_kplogo_targets,
+        expand(os.path.join(LOGO_OUTPUT_DIR,
+                            "{replicate}_{protein}/image/{replicate}_{protein}.info.eps"),
+               zip,
+               replicate=[r for (r, p) in KPLOGO_PAIRS],
+               protein=[p for (r, p) in KPLOGO_PAIRS]),
+
+        # plogo PDFs
+        expand(f'{OUTPUT_DIR}/motif_plogo/{{replicate}}_{{protein}}.plogo.pdf',
+               zip,
+               replicate=[r for (r, p) in KPLOGO_PAIRS],
+               protein=[p for (r, p) in KPLOGO_PAIRS]),
 
 #rule fastqc:
 #    output: 'qualitycheck/{sample}_L2_1.fastqc.zip'
