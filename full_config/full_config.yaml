@@ -8,7 +8,6 @@
 # Please ensure your device or server of choice has sufficient storage space for all of the following directories
 
 input_dir: "./input"
-# input_dir: "/home/chulfyp1/data/Motif_Analysis_Automation/example_seq"
 # raw NGS reads should be downloaded into input_dir/
 
 intermediate_dir: "./intermediate_files"

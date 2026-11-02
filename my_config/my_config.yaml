@@ -1,0 +1,119 @@
+# config.yaml
+
+
+
+### Samples & Directories ###
+
+# Input, intermediate output and output directories
+# Please ensure your device or server of choice has sufficient storage space for all of the following directories
+
+input_dir: "./input"
+# raw NGS reads should be downloaded into input_dir/
+
+intermediate_dir: "./intermediate_files"
+# intermediate output files will be exported here
+
+preprocessed_seq_dir: "preprocessed_sequences"
+# preprocessed-seq_dir is located inside intermediate_dir for storing preprocessed and collapsed sequences in .tsv format
+
+output_dir: "./output"
+# this stores the final output files
+
+# Sample names & parameters
+sample_sheet: "./my_config/my_samples.csv"
+# change the names and parameters here to your liking
+
+#############################
+
+
+
+### Sequence Preprocessing ###
+# Preprocessing parameters are configured in the sample sheet
+##############################
+
+
+
+### Dictionary Mapping & Scatter Plot Generation ###
+
+# Count Filters
+# For full dataset, use 100, 50, 20, 
+dict_min_count_rep1: {int}
+dict_min_count_rep2: {int}
+clv_min_count_rep1: {int}
+clv_min_count_rep2: {int}
+
+# Length Filters
+# For full dataset, use 15, 25
+min_insert_len: {int}
+max_insert_len: {int}
+
+# Set the following to 4000 for full dataset
+top_n_seq: {int}
+
+# Output paths of various files can be modified at `out:` and `out_template:`
+
+# Supp-Fig-3a,b: dictionary depth
+supp3ab:
+  out: supp_fig/supp3ab_dict_depth.pdf
+
+# Supp-Fig-4a,b and 5a,b: per-replicate depth and efficiency
+supp4a:
+  out: supp_fig/supp4a_rep1_clv_depth.pdf
+supp4b:
+  out: supp_fig/supp4b_rep2_clv_depth.pdf
+supp5a:
+  out: supp_fig/supp5a_rep1_clv_eff.pdf
+supp5b:
+  out: supp_fig/supp5b_rep2_clv_eff.pdf
+
+# Supp-Fig-6a: rank-grouped relative cleavage efficiency
+# The loop below produces one figure per protein sequence pair (CR+NP)
+# separate into the bins [0, 400, 1600, 4000, .inf] for full dataset
+supp6a: 
+  out_template: supp_fig/supp6a_{protein}_clv-eff.pdf #keep {protein} as is. Don't change it.
+  bins: [{int}, {int}, {int}, {int}, .inf]
+  labels: ["str", "str", "str", "The rest"] 
+  colors: ["tab:blue", "tab:orange", "tab:green", "tab:red"] 
+
+# Fig-2c,e: per-sample motif-scatter recipes
+# plot compares 2 replicates, please comment out if only 1 replicate is involved
+motif_figs: 
+  {protein}-{type}:
+    motif_type: {?nt_motif}
+    n_top: {int}
+    n_bottom: {int}
+    highlight: null
+    xlim: [{int}, {int}]
+    ylim: [{int}, {int}]
+    out: main_fig/{filename}.pdf
+
+# Fig-2f: motif boxplot + Mann-Whitney vs reference, for Psp only
+fig2f:
+  target:     "{protein}-{type}"
+  motifs:     ["STR", "STR", "STR", "STR...etc"]
+  reference:  "STR"
+  rep1_ylim:  [{int}, {int}]
+  rep2_ylim:  [{int}, {int}]
+  out:        main_fig/{filename}.pdf
+  stats_out:  main_fig/{filename}.tsv
+
+# ---- Tables ----
+mapped_clv_table:
+  out: mapped_clv_seq_full.xlsx
+
+####################################################
+
+
+
+### pLogo Generation with kpLogo Package ###
+
+max_k: 1
+min_count: 0
+p_cutoff: 0.05
+fdr: false
+region: null
+weighted: false
+ranked: false
+extra_args: "-plot s -stack_order -1 -fix 1.1 -pseudo 2.5"
+
+############################################

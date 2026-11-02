@@ -1,0 +1,7 @@
+﻿accession,replicate,protein,type,adapter_5p,adapter_3p,random_at_3p,min_len,max_len
+accession_1,1,MyProtein,NP,sequence_1,sequence_2,-4,3,35
+accession_2,1,MyProtein,CR,sequence_1,sequence_2,-4,3,35
+accession_3,2,MyProtein,NP,sequence_1,sequence_2,-4,3,35
+accession_4,2,MyProtein,CR,sequence_1,sequence_2,-4,3,35
+accession_5,2,MyDict,DT,sequence_1,sequence_2,-4,3,35
+accession_6,2,MyDict,DT,sequence_1,sequence_2,-4,3,35

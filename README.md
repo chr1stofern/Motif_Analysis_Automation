@@ -40,7 +40,7 @@ The intermediate output directory is specified as `intermediate_dir` in the conf
 Note that the processed example reads are stored in `intermediate_files/sampled_tsv` inside the cloned repository. Refer to [Initial Configuration](#initial-configuration) on how to use the example sequences and configure the directory paths.
 
 ### Final Output Files:
-A total of 3 subdirectories, namely `main_fig`, `supp_fig` and `motif_plogo`, and one xlsx sheet will be produced in the `output_dir`. If you choose to use our dataset from GSE313507, there will be 7 files in `main_fig` by default, each corresponding to parts of the main figures in the publication; 6 files in `supp_fig`, each corresponding to parts of the supplementary figures in the publication; and 10 files in `motif_plogo` corresponding to the motifs of the 5 Cas13 protein tested in two replicates. For details on choosing parameters, please refer to the [Initial Configuration](#initial-configuration) section
+A total of 3 subdirectories, namely `main_fig`, `supp_fig` and `motif_plogo`, and one xlsx sheet will be produced in the `output_dir`. If you choose to use our dataset from GSE313507, there will be 5 files in `main_fig` by default, each corresponding to parts of the main figures in the publication; 10 files in `supp_fig`, each corresponding to parts of the supplementary figures in the publication; and 10 files in `motif_plogo` corresponding to the motifs of the 5 Cas13 protein tested in two replicates. For details on choosing parameters, please refer to the [Initial Configuration](#initial-configuration) section
 
 By default, the following files with be produced in each subdirectory:
 1. **`supp_fig`:**
@@ -88,13 +88,13 @@ Please move into the cloned directory before proceeding:
 cd <repository-folder>
 ```
 
+On older versions of Conda where libmamba may not be installed, install it by running the following:
+```bash
+conda install conda-forge::conda-libmamba-solver
+```
 Run the following command to create an environment with the necessary dependencies as declared by environment.yaml, including kpLogo, via conda:
 ```bash
 conda env create -f environment.yaml --solver=libmamba
-```
-On older versions of Conda where libmamba may not be installed, install it by running the following first, then create the environment:
-```bash
-conda install conda-forge::conda-libmamba-solver
 ```
 
 Please activate the conda environment every time before running the script:
@@ -110,14 +110,14 @@ uv sync
 
 ## Initial Configuration
 ### Configuring Input & Output Directories/Files:
-Within the configuration file `config.yaml`, please modify the parameters `input_dir`, `intermediate_dir` and `output_dir` to point to directories of your liking. Please make sure these locations, particularly `input_dir`, has sufficient storage (at least 100 GB). You may also modify the names of `preprocessed_seq_dir` and `output_dir` if you wish. But their locations will not be changed.
+If you are testing the example subset or the full dataset (more in the next section), need not modify any files. Simply move on to the next section. However, for the full dataset, please Please make sure the cloned directory has sufficient storage (at least 100 GB).
 
-If you are testing the example sequences (more in the next section), please set `intermediate_dir` as `{full/path/to/cloned/repo}/intermediate_files`, and `preprocessed_seq_dir` as `sampled_tsv`.
+If you are using your own data, please locate the configuration file `config.yaml` and modify the parameters `input_dir`, `intermediate_dir` and `output_dir` to point to directories of your liking. Again, make sure these locations have sufficient storage. You may also modify the names of `preprocessed_seq_dir` and `output_dir` if you wish. But they will still be produced under the same parent directory.
 
 ### Setting Up Samples:
-This package can be used in one of 3 ways: with example sequences, with the full dataset from which we produced the figures for our previous publication, and with your own data.
+This package can be used in one of 3 ways: with an example subset, with the full dataset from which we produced the figures for our previous publication, and with your own data.
 
-The example sequences are included as a supplementary data for the STAR protocol, and make up a subset of the preprocessed full dataset. In particular, the preprocessed `.collapsed.tsv` of LwaCas13a cleavage samples and the dictionary samples for both replicates. After downloading the samples, please please all files within the directory <cloned/repo>/input.
+The example sequences are included as a compressed .zip file under <program_repo>/intermediate_files/preprocessed_sequences.zip. These sequences make up a subset of the preprocessed intermediates of the full dataset. In particular, the preprocessed `.collapsed.tsv` of LwaCas13a cleavage samples and the dictionary samples for both replicates. Before proceeding, unzip the file in the same directory (intermediate_files) and check that the folder produced is named as `preprocessed_sequences`. Do not place the folder elsewhere for this use case.
 
 To download the full dataset (deposited in the NCBI Gene Expression Omnibus, GEO, under the accession number GSE313507) necessary for reproducing figures in our publication, please add execution rights to the download script by running: `chmod +x ./fetch_raw.sh`, then run the bash script fetch_raw.sh with the syntax:
 ```bash
@@ -131,128 +131,64 @@ Alternately, you may also download the raw data via the [SRA Explorer](https://s
 Note that the script supports 1-2 replicates. To process more than 2 replicates, you may either edit the internal code, or simply repeat the process and specify a different set of samples for the script to run (save the previous outputs first before re-running).
 
 ### Naming Samples
-If you choose to use the example sequences or the .sh download script, the downloaded files will already be in the correct naming format, and you may skip this and the next two section. 
+If you choose to use the example sequences or the .sh download script, the downloaded files will already be in the correct naming format, and you may skip this and the next two section. For such use cases, you may skip the next section few sections on configuring parameters. The sample information sheet and config.yaml file are already ready.
 
 If you choose to use your own data, please make sure your raw sequence files match the following naming format:
 `{rep#}_{sample/protein name}-{type: CR (crRNA and protein added), or NP (no protein), or DT (dictionary)}.fastq.gz`. For example, for a crRNA added PspCas13b conducted in replicate 1, it shall be named 1_Psp-CR.fastq.gz ({sample/protein name} can be changed to any string of your liking, but must not include "-" or "\_"); for a dictionary conducted in replicate 2, it shall be named 2_Dict-DT.fastq.gz (again, "Dict" can be changed to other strings except "-" and "\_").
 
-The full list of sequencing samples should also be documented in the sample sheet (by default `samples.csv` or `examples.csv`, you can change where `sample_sheet` points to in `config.yaml`). 
-- Column 1 `accession`: specifies the GEO assession number of each sample
-- Column 2 `replicate`: specifies the replicate number --- `1`, or `2`
-- Column 3 `protein`: specifies the protein or sample name (any string without "-" or "_")
-- Column 4 `type`: specifies the sample type --- `CR` (crRNA and protein added), or `NP` (no protein), or `DT` (dictionary)
-- The remaining columns are described in the next section
-
-If you are using our full dataset, simply point `sample_sheet` to `samples.csv` and need not change its content. Similarly, if you are using the example data, point `sample_sheet` to `examples.csv` and need not change its content. For such usages, you may skip the next section on sequence preprocessing configuration, since the sample sheet is already ready.
+The full list of sequencing samples should also be documented in the sample information sheet. A template `my_samples.csv` is provided in `<program_repo>/my_config/`.
+- Column 1 `accession`: specifies the GEO assession number of each sample. This column can be left empty if samples are not downloaded from GEO and are already in your local storage.
+- Column 2 `replicate`: specifies the replicate number --- `1`, or `2`.
+- Column 3 `protein`: specifies the protein or sample name (any string without "-" or "_").
+- Column 4 `type`: specifies the sample type --- `CR` (crRNA and protein added), or `NP` (no protein), or `DT` (dictionary).
+- The remaining columns are described in the next section.
 
 ### Configuring Parameters for Raw Sequence Preprocessing:
-Please make sure filenames of RAW NGS sequences follow the naming pattern as aforementioned. After that, obtain the appropriate 5' and 3' adaptor sequences used in your experiment's sequencing setup, and paste them into column 5 and 6 respectively of the sample sheet. 
+Please make sure filenames of your raw NGS sequences follow the naming pattern as aforementioned. After that, obtain the appropriate 5' and 3' adaptor sequences used in your experiment's sequencing setup, and paste them into column 5 and 6 respectively of the sample sheet. 
 
 The remaining 3 columns of `sample_sheet` allows for additional control on the trimming of sequences after the initial adaptor sequence is removed.
-- Column 7 `random_at_3p`: trims a number of bases from one end of the sequence, e.g., if set to 3, 3 bases will be removed from the 5' end of a sequence, if set to -4, 4 bases will be removed from the 3' end of a sequence, if set to 0, nothing will be removed
-- Column 8 `min_len`: the minimum length for the sequence to not be filtered out (i.e. any sequence with length < `min_len` will be discarded)
-- Column 9 `max_len`:the maximum length for the sequence to not be filtered out (i.e. any sequence with length > `max_len` will be discarded)
+- Column 7 `random_at_3p`: trims a number of bases from one end of the sequence, e.g., if set to 3, 3 bases will be removed from the 5' end of a sequence, if set to -4, 4 bases will be removed from the 3' end of a sequence, if set to 0, nothing will be removed.
+- Column 8 `min_len`: the minimum length for the sequence to not be filtered out (i.e. any sequence with length < `min_len` will be discarded).
+- Column 9 `max_len`:the maximum length for the sequence to not be filtered out (i.e. any sequence with length > `max_len` will be discarded).
 
 ### Dictionary Mapping & Scatter Plot Generation:
-If you decide to apply the pipeline on sequences of your choice, please modify the sample importing and exporting logic of `generate_plots.py` accordingly, particularly for the `MOTIF_FIGS` dictionary, and the sections Supp-Fig-6a and Fig-2f.
-
-After the adaptor trimming, the adaptor-trimmed sequences are further processed with a count and length filter. The relevant parameters can be found and modified in `config.yaml`.
+After the adaptor trimming, the adaptor-trimmed sequences are further processed with a count and length filter. The relevant parameters can be found and modified in the template `<program_repo>/my_config/my_config.yaml`.
 
 **Count Filters:**
 - `dict_min_count_rep1`: minimum count of a particular sequence in the dictionary sample of replicate 1 for it to be filtered in
 - `dict_min_count_rep2`: minimum count of a particular sequence in the dictionary sample of replicate 2 for it to not be filtered in
 - `clv_min_count_rep1`: minimum count of a particular sequence in the cleavage sample of replicate 1 for it to be filtered in
 - `clv_min_count_rep2`: minimum count of a particular sequence in the cleavage sample of replicate 1 for it to be filtered in
-Note that we use different values for `dict_min_count_rep1` and `dict_min_count_rep2`, since the sequencing depth of the dictionary from replicate 1 is higher than that of replicate 2. For processing the example sequences, please use a low count of 1 for all filters. For your own data, please adjust accordingly.
+
+Note that we use different values for `dict_min_count_rep1` and `dict_min_count_rep2`, since the sequencing depth of the dictionary from replicate 1 is higher than that of replicate 2. For processing our example dataset, or full dataset, keep the parameters as is. For processing your own data, please adjust them accordingly.
 
 **Length Filters:**
 - `min_insert_len`: minimum length of a particular sequence in the cleavage sample for it to be filtered in
 - `max_insert_len`: maximum length of a particular sequence in the cleavage sample for it to be filtered in
 The final processed sequence (insert) to be mapped to the dictionary must be equal to or longer than the `min_insert_len`, and shorter than the `max_insert_len` before proceeding.
-For processing our full data or the example data, keep these as is. For your own data, please adjust accordingly.
+For processing our example dataset, or full dataset, keep the parameters as is. For processing your own data, please adjust them accordingly.
 
 **Rank Filter:**
-After all sequences are mapped to the dictionary, the sequences are ranked based on their relative cleavage efficiency, and only the top 4000 sequences are taken for pLogo visualisation for our data. This can be controlled by the parameter `top_n_seq` in `config.yaml`, and it also changes the line drawn in the plot of relative cleavage efficiency against their ranking (supp. fig. 5) for ease of reference. For our full data, keep the parameter as 4000; for the example data, change it to 40. For your own data, please adjust accordingly.
+After all sequences are mapped to the dictionary, the sequences are ranked based on their relative cleavage efficiency, and only the top 4000 sequences are taken for pLogo visualisation for our full data. This can be controlled by the parameter `top_n_seq` in `my_config.yaml`, and it also changes the line drawn in the plot of relative cleavage efficiency against their ranking (supp. fig. 5) for ease of reference. Please adjust the value accordingly for your own data.
 
 **Parameters for Supp. Fig. 6a:**
-The grouping of ranked motifs into separate bins can be modified to your liking. In the publication, we separated the motifs into the top 0-400 (top 400) ranked motifs, the top 401-1600, the top 1601-4000, and the remaining (4001-infinity). The actual grouping of data can be modified at `bins:` in the `supp6a:` section of config.yaml. For the full data, we write `bins:   [0, 400, 1600, 4000, .inf]` where .inf denotes infinity. To change the labels along the x-axis of the figure, modify the second parameter `labels:`. To change the colour of individual boxes for each group, modify `colors:`.
+The grouping of ranked motifs into separate bins can be modified to your liking. In the publication, we separated the motifs into the top 0-400 (top 400) ranked motifs, the top 401-1600, the top 1601-4000, and the remaining (4001-infinity). The actual grouping of data can be modified at `bins:` in the `supp6a:` section of `my_config.yaml`. For the full data, we write `bins:   [0, 400, 1600, 4000, .inf]` where .inf denotes infinity. To change the labels along the x-axis of the figure, modify the second parameter `labels:`. To change the colour of individual boxes for each group, modify `colors:`.
 
 **Parameters for Fig. 2c,e:**
-Since Fig. 2c,e plots the cleavage efficiencies of both replicates 1 and 2, please comment out the entire indented section following `motif_figs:` (comment `motif_figs:` itself as well). If using the full dataset, you may use the following setup:
-```yaml
-motif_figs:
-  Lbu-CR:
-    motif_type: 2nt_motif
-    n_top: 5
-    n_bottom: 0
-    highlight: null
-    xlim: [0.1, 0.37]
-    ylim: [0.4, 1.9]
-    out: main_fig/fig2c_lbu_motif-clv-eff.pdf
-  Lwa-CR:
-    motif_type: 2nt_motif
-    n_top: 3
-    n_bottom: 0
-    highlight: "CT"
-    xlim: [0.22, 0.6]
-    ylim: [0.9, 1.9]
-    out: main_fig/fig2c_lwa_motif-clv-eff.pdf
-  Bt3-CR:
-    motif_type: 2nt_motif
-    n_top: 1
-    n_bottom: 0
-    highlight: null
-    xlim: [0.2, 0.45]
-    ylim: [0.75, 2.45]
-    out: main_fig/fig2c_bt3_motif-clv-eff.pdf
-  Rfx-CR:
-    motif_type: 2nt_motif
-    n_top: 1
-    n_bottom: 0
-    highlight: null
-    xlim: [0.3, 0.56]
-    ylim: [0.65, 2.9]
-    out: main_fig/fig2c_rfx_motif-clv-eff.pdf
-  Psp-CR:
-    motif_type: 3nt_motif
-    n_top: 7
-    n_bottom: 3
-    highlight: null
-    xlim: [0.15, 0.47]
-    ylim: [0.8, 2.8]
-    out: main_fig/fig2e_psp_motif-clv-eff.pdf
-```
-If using the example data, replace the block with:
-```yaml
-  RfxExample-CR:
-    motif_type: 2nt_motif
-    n_top: 1
-    n_bottom: 0
-    highlight: null
-    xlim: [0.2, 17]
-    ylim: [1, 12]
-    out: main_fig/fig2c_rfx_motif-clv-eff.pdf
-```
-If you are using your own data, please change the first indented line (e.g., RfxExample-CR) to your sample names following the {protein/sample}-{type} format (replicate number is not necessary). Then, specify whether the protein recognises a 2nt or 3nt motif in `motif_type:` as `2nt_motif` or `3nt_motif` respectively. n_top specifies the number of top ranked motif(s) you wish to highlight on the plot, and conversely, n_bottom specifies the number of the lowest ranked motif(s) you wish to highlight on the plot. If there are other motifs you wish to highlight but are not among the top and bottom few motifs, you can specify them with the format `highlight: ["motif_string_1", "motif_string_2"]`, e.g., `highlight: ["CT", "GG"]`. `xlim` and `ylim` controls the visible range of the two axes. Modify them accordingly if some data points clip outside of the figure. You may do so by checking the range of the data to be plotted, which is printed in the "Producing Fig-2c,e" section, then increasing the parameters to cover the entire range. Lastly, configure the output path and file name with `out`.
+Fig. 2c,e plots the cleavage efficiencies of both replicates 1 and 2. If you are using your own data, please change the first indented line ({protein}-{type}:) to your sample names following the specified format (replicate number is not necessary). You may refer to the pre-built `example_config.yaml` and `full_config.yaml` as examples. 
+
+Next, specify whether the protein recognises a 2nt or 3nt motif in `motif_type:` as `2nt_motif` or `3nt_motif` respectively. 
+
+n_top specifies the number of top ranked motif(s) you wish to highlight on the plot, and conversely, n_bottom specifies the number of the lowest ranked motif(s) you wish to highlight on the plot. If there are other motifs you wish to highlight but are not among the top and bottom few motifs, you can specify them with the format `highlight: ["motif_string_1", "motif_string_2"]`, e.g., `highlight: ["CT", "GG"]`. 
+
+`xlim` and `ylim` controls the visible range of the two axes. Modify them accordingly if some data points clip outside of the figure. You may do so by checking the range of the data to be plotted, which is printed in the "Producing Fig-2c,e" section during run-time, then increasing the parameters to cover the entire range.
 
 **Parameters for Fig. 2f:**
-This figure is only generated for PspCas13b. When using the full dataset, comment out the line `fig2f: null` and add the following block in `config.yaml`:
-```yaml
-# Fig-2f: motif boxplot + Mann-Whitney vs reference, for Psp only
-fig2f:
-  target:     "Psp-CR"
-  motifs:     ["TAT", "TCA", "CAA", "GTT"]
-  reference:  "GTT"
-  rep1_ylim:  [0, 1]
-  rep2_ylim:  [0, 6]
-  out:        main_fig/fig2f_psp_clv-eff.pdf
-  stats_out:  main_fig/fig2_psp_mann-whitney.tsv
-```
-Otherwise, when using the example data, check that the following line is uncommented: 
-```yaml
-fig2f: null
-```
-If you wish to construct this plot for your own data, please modify `target:` to select the desired sample for analysis. To select other motifs relevant for your protein, please modify `motifs:`. The `reference:` motif specifies the motif that the target `motifs:` will be tested against for significance. `rep1_ylim:` and `rep2_ylim:` controls the height of the y-axis of the plot for replicate 1 and replicate 2 respectively. You may also modify the output path of the figure with `out:`. Finally, an additional .tsv file containing the significance values (obtained from the Mann–Whitney U test of the motifs) will also be exported. Again, you may modify the output path of this data file via `stats_out:`.
+This figure is only generated for PspCas13b when using the full dataset. If you wish to construct this plot for your own data, please modify `target:` to select the desired sample for analysis. 
+
+To select other motifs relevant for your protein, please modify `motifs:`. The `reference:` motif specifies the motif that the target `motifs:` will be tested against for significance. 
+
+`rep1_ylim:` and `rep2_ylim:` controls the height of the y-axis of the plot for replicate 1 and replicate 2 respectively. A .tsv file containing the significance values (obtained from the Mann–Whitney U test of the motifs) will also be exported. You may refer to the pre-built `example_config.yaml` and `full_config.yaml` as examples.
 
 ### pLogo Generation with kpLogo Package:
 The generation of motif logos for all samples is automated with the kpLogo package. You may simply run the script without changing any parameters for kpLogo for all data use cases. If you do wish to modify certain parameters, you may do so at the kpLogo block in `config.yaml`. For detailed instructions on using kpLogo, please consult the package manual by running `kpLogo` on the terminal (while the [Conda environment](#setting-up-conda-environment) is activated). 
@@ -273,11 +209,23 @@ Please keep the parameter `-pseudo 2.5` unmodified. This adds a "pseudocount" (d
 First open [pLogo generation website](https://plogo.uconn.edu/) on a browser of your choice. Keep the option `remove duplicate sequences` checked for both foreground (left box with the label "1. Paste or upload aligned sequences" on top) and background (the right box with the label "2. Select, upload, or paste a background"). Then, drag and drop the processed and mapped sequences into the appropriate input boxes, or upload them by clicking `choose file`. For example, 1_RfxExample-CR.collapsed.tsv (stored in `intermediate_files/logo_input`) shall be used as the foreground, while 1_RfxExample-NP.collapsed.tsv shall be used as the background. When both foreground and background sequences are approved, click the `generate pLogo` button. You may directly export the generated logo by clicking `Export Image` on the `export` tab. Or, you may also modify other customisation and export file parameters before doing so. If you wish to obtain the raw data of the plot, you may also obtain it by clicking the `Export raw position weight matrix values` button on the `export tab`. For other samples/replicates, repeat the process with the relevant foreground and background files.
 
 ## Running the Script
-To run the entire pipeline, execute the following:
+To run the entire pipeline for the example dataset, execute the following:
 ````bash
-uv run snakemake --core 30
-````
 uv run snakemake --configfile ./example_config/example_config.yaml --cores 30
+
+````
+
+To run the entire pipeline for the full dataset, execute the following:
+````bash
+uv run snakemake --configfile ./full_config/full_config.yaml --cores 30 
+
+````
+
+To run the entire pipeline for your own dataset, execute the following:
+````bash
+uv run snakemake --configfile ./my_config/my_config.yaml --cores 30 
+
+````
 
 ## Cleanup Guide
 ### Removing Intermediate Output & Output Files:
