@@ -4,17 +4,17 @@
 ### Experiment
 In our previous publication, we mapped the in vitro cleavage sites of various Cas13 proteins using random substrates. In total, 22 samples/sequencing files (11 for each of two replicate) were obtained for downstream analysis. The samples for each replicate are as follows:
 
-Lbu: No Protein  
-Lbu: Targetting crRNA 
-Lwa: No Protein
-Lwa: Targetting crRNA  
-Psp: No Protein
-Psp: Targetting crRNA  
-bt3: No Protein  
-bt3: Targetting crRNA  
-Rfx: No Protein
-Rfx: Targetting crRNA  
-Dictionary: oKWW2182  
+Lbu: No Protein\
+Lbu: Targetting crRNA\
+Lwa: No Protein\
+Lwa: Targetting crRNA\
+Psp: No Protein\
+Psp: Targetting crRNA\
+bt3: No Protein\
+bt3: Targetting crRNA\
+Rfx: No Protein\
+Rfx: Targetting crRNA\
+Dictionary: oKWW2182
 
 ### What the Code Does
 1. **Raw NGS Reads Preprocessing:**\
