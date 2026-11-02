@@ -7,7 +7,7 @@
 # Input, intermediate output and output directories
 # Please ensure your device or server of choice has sufficient storage space for all of the following directories
 
-input_dir: "/home/chulfyp1/data/test_download_2"
+input_dir: "./input"
 # raw NGS reads should be downloaded into input_dir/
 
 intermediate_dir: "./intermediate_files"
