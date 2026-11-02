@@ -6,23 +6,22 @@
 
 # Input, intermediate output and output directories
 # Please ensure your device or server of choice has sufficient storage space for all of the following directories
-# input_dir: "/home/chulfyp1/data/test_download_2"
-input_dir: "/home/chulfyp1/data/Motif_Analysis_Automation/example_seq"
+
+input_dir: "input"
 # raw NGS reads should be downloaded into input_dir/
 
-# intermediate_dir: "/home/chulfyp1/data/motif/intermediate_files"
-intermediate_dir: "/home/chulfyp1/data/Motif_Analysis_Automation/intermediate_files"
+intermediate_dir: "./intermediate_files"
 # intermediate output files will be exported here
-# preprocessed_seq_dir: "preprocessed_sequences"
-preprocessed_seq_dir: "sampled_tsv"
+
+preprocessed_seq_dir: "preprocessed_sequences"
 # preprocessed-seq_dir is located inside intermediate_dir for storing preprocessed and collapsed sequences in .tsv format
-# output_dir: "/home/chulfyp1/data/motif/output"
-output_dir: "/home/chulfyp1/data/motif_example/output"
+
+output_dir: "./output"
 # this stores the final output files
 
 # Sample names & parameters
-# sample_sheet: "/home/chulfyp1/data/Motif_Analysis_Automation/samples.csv"
-sample_sheet: "/home/chulfyp1/data/Motif_Analysis_Automation/examples.csv"
+
+sample_sheet: "./example_config/examples.csv"
 # change the names and parameters here to your liking
 
 #############################
@@ -38,19 +37,18 @@ sample_sheet: "/home/chulfyp1/data/Motif_Analysis_Automation/examples.csv"
 ### Dictionary Mapping & Scatter Plot Generation ###
 
 # Count Filters
-# Set all four filters to 1 when using example sequences
 # For full dataset, use 100, 50, 20, 20
-dict_min_count_rep1: 1
-dict_min_count_rep2: 1
-clv_min_count_rep1: 1
-clv_min_count_rep2: 1
+dict_min_count_rep1: 100 
+dict_min_count_rep2: 50 
+clv_min_count_rep1: 20 
+clv_min_count_rep2: 20 
 
 # Length Filters
-# For example data and full dataset, use 15, 25
+# For full dataset, use 15, 25
 min_insert_len: 15
 max_insert_len: 25
 
-# Set the following 40 for example data, 4000 for full dataset
+# Set the following to 4000 for full dataset
 top_n_seq: 40
 
 # Output paths of various files can be modified at `out:` and `out_template:`
@@ -71,24 +69,24 @@ supp5b:
 
 # Supp-Fig-6a: rank-grouped relative cleavage efficiency
 # The loop below produces one figure per protein sequence pair (CR+NP)
-# separate into the bins [0, 4, 16, 40, .inf] for example data, [0, 400, 1600, 4000, .inf] for full dataset
-supp6a:
-  out_template: supp_fig/supp6a_{protein}_clv-eff.pdf
-  bins:   [0, 4, 16, 40, .inf]      # YAML parses '.inf' as float('inf')
-  labels: ["Top4", "Top5–16", "Top17–40", "The rest"]
-  colors: ["tab:blue", "tab:orange", "tab:green", "tab:red"]
+# separate into the bins [0, 400, 1600, 4000, .inf] for full dataset
+supp6a: 
+  out_template: supp_fig/supp6a_{protein}_clv-eff.pdf 
+  bins: [0, 400, 1600, 4000, .inf]
+  labels: ["Top400", "Top401–1600", "Top1601–4000", "The rest"] 
+  colors: ["tab:blue", "tab:orange", "tab:green", "tab:red"] 
 
 # Fig-2c,e: per-sample motif-scatter recipes
 # plot compares 2 replicates, please comment out if only 1 replicate is involved
 motif_figs:
-  RfxExample-CR:
-    motif_type: 2nt_motif
-    n_top: 1
-    n_bottom: 0
-    highlight: null
-    xlim: [0.2, 17]
-    ylim: [1, 12]
-    out: main_fig/fig2c_rfx_motif-clv-eff.pdf
+  LwaExample-CR:
+    motif_type: 2nt_motif 
+    n_top: 3 
+    n_bottom: 0 
+    highlight: "CT" 
+    xlim: [0.22, 0.6] 
+    ylim: [0.9, 1.9] 
+    out: main_fig/fig2c_lwa_motif-clv-eff.pdf 
 
 # Fig-2f: motif boxplot + Mann-Whitney vs reference, for Psp only
 fig2f: null

@@ -18,7 +18,7 @@ Dictionary: oKWW2182
 
 ### What the Code Does
 1. **Raw NGS Reads Preprocessing:**\
-Each sequencing read is reduced to the insert/substrate fragment it contains, i.e. the sequence the Cas13 protein actually recognises. The preprocessing is conducted with various command line packages, including fastqc, cutadapt, fastq_quality_filter, fastx_collapser and seqkit, all of which are called by a fully automated `snakemake` script (`Snakefile`).
+Each sequencing read is reduced to the insert/substrate fragment it contains, i.e. the sequence the Cas13 protein actually recognises. The preprocessing is conducted with various command line packages, including cutadapt, fastq_quality_filter, fastx_collapser and seqkit, all of which are called by a fully automated `snakemake` script (`Snakefile`).
     - **Adapter trimming:** the 5' and 3' sequencing adapters are removed from both cleavage and dictionary samples.
     - **Trimming the last 4nt random region:** for cleavage libraries, the last 4 nt of the insert were synthesised as a random region and carry no motif information and shall be trimmed. Dictionary inserts are fixed and thus unmodified.
     - **Length filtering:** reads are kept only if their insert falls within the expected size range: 1–35 nt for cleavage libraries, and exactly 35 nt for the dictionary. This removes empty inserts, adapter dimers, and reads longer than the library design.
@@ -117,9 +117,9 @@ If you are testing the example sequences (more in the next section), please set 
 ### Setting Up Samples:
 This package can be used in one of 3 ways: with example sequences, with the full dataset from which we produced the figures for our previous publication, and with your own data.
 
-The example sequences are already included in the repository, and are obtained by running the command `awk 'NR % 10 == 0' {ORIGINAL_SEQ.collapsed.tsv} > {EXAMPLE_SEQ.collapsed.tsv}` on RfxCas13d and dictionary sequences.
+The example sequences are included as a supplementary data for the STAR protocol, and make up a subset of the preprocessed full dataset. In particular, the preprocessed `.collapsed.tsv` of LwaCas13a cleavage samples and the dictionary samples for both replicates. After downloading the samples, please please all files within the directory <cloned/repo>/input.
 
-To download the raw NGS data (deposited in the NCBI Gene Expression Omnibus, GEO, under the accession number GSE313507) necessary for reproducing figures in our publication, please add execution rights to the download script by running: `chmod +x ./fetch_raw.sh`, then run the bash script fetch_raw.sh with the syntax:
+To download the full dataset (deposited in the NCBI Gene Expression Omnibus, GEO, under the accession number GSE313507) necessary for reproducing figures in our publication, please add execution rights to the download script by running: `chmod +x ./fetch_raw.sh`, then run the bash script fetch_raw.sh with the syntax:
 ```bash
 ./fetch_raw.sh <full/path/to/samples.csv> <full/path/to/input_dir>
 ```
@@ -131,7 +131,9 @@ Alternately, you may also download the raw data via the [SRA Explorer](https://s
 Note that the script supports 1-2 replicates. To process more than 2 replicates, you may either edit the internal code, or simply repeat the process and specify a different set of samples for the script to run (save the previous outputs first before re-running).
 
 ### Naming Samples
-If you choose to use the toy sequences or the .sh download script, the downloaded files will already be in the correct naming format. If you choose to use your own data, please make sure your raw sequence files match the following naming format:
+If you choose to use the example sequences or the .sh download script, the downloaded files will already be in the correct naming format, and you may skip this and the next two section. 
+
+If you choose to use your own data, please make sure your raw sequence files match the following naming format:
 `{rep#}_{sample/protein name}-{type: CR (crRNA and protein added), or NP (no protein), or DT (dictionary)}.fastq.gz`. For example, for a crRNA added PspCas13b conducted in replicate 1, it shall be named 1_Psp-CR.fastq.gz ({sample/protein name} can be changed to any string of your liking, but must not include "-" or "\_"); for a dictionary conducted in replicate 2, it shall be named 2_Dict-DT.fastq.gz (again, "Dict" can be changed to other strings except "-" and "\_").
 
 The full list of sequencing samples should also be documented in the sample sheet (by default `samples.csv` or `examples.csv`, you can change where `sample_sheet` points to in `config.yaml`). 
@@ -176,7 +178,7 @@ After all sequences are mapped to the dictionary, the sequences are ranked based
 The grouping of ranked motifs into separate bins can be modified to your liking. In the publication, we separated the motifs into the top 0-400 (top 400) ranked motifs, the top 401-1600, the top 1601-4000, and the remaining (4001-infinity). The actual grouping of data can be modified at `bins:` in the `supp6a:` section of config.yaml. For the full data, we write `bins:   [0, 400, 1600, 4000, .inf]` where .inf denotes infinity. To change the labels along the x-axis of the figure, modify the second parameter `labels:`. To change the colour of individual boxes for each group, modify `colors:`.
 
 **Parameters for Fig. 2c,e:**
-Since Fig. 2c/e plots the cleavage efficiencies of both replicates 1 and 2, please comment out the entire indented section following `motif_figs:` (comment `motif_figs:` itself as well). If using the full dataset, you may use the following setup:
+Since Fig. 2c,e plots the cleavage efficiencies of both replicates 1 and 2, please comment out the entire indented section following `motif_figs:` (comment `motif_figs:` itself as well). If using the full dataset, you may use the following setup:
 ```yaml
 motif_figs:
   Lbu-CR:
@@ -253,7 +255,7 @@ fig2f: null
 If you wish to construct this plot for your own data, please modify `target:` to select the desired sample for analysis. To select other motifs relevant for your protein, please modify `motifs:`. The `reference:` motif specifies the motif that the target `motifs:` will be tested against for significance. `rep1_ylim:` and `rep2_ylim:` controls the height of the y-axis of the plot for replicate 1 and replicate 2 respectively. You may also modify the output path of the figure with `out:`. Finally, an additional .tsv file containing the significance values (obtained from the Mann–Whitney U test of the motifs) will also be exported. Again, you may modify the output path of this data file via `stats_out:`.
 
 ### pLogo Generation with kpLogo Package:
-The generation of motif logos for all samples is automated with the kpLogo package. You may simply run the script without changing any parameters for kpLogo for all data use cases. If you do wish to modify certain parameters, you may do so at the kpLogo block in `config.yaml`. For detailed instructions on using kpLogo, please consult the manual by running `kpLogo` on the terminal (while the [Conda environment](#setting-up-conda-environment) is activated). 
+The generation of motif logos for all samples is automated with the kpLogo package. You may simply run the script without changing any parameters for kpLogo for all data use cases. If you do wish to modify certain parameters, you may do so at the kpLogo block in `config.yaml`. For detailed instructions on using kpLogo, please consult the package manual by running `kpLogo` on the terminal (while the [Conda environment](#setting-up-conda-environment) is activated). 
 
 ```yaml
 max_k: 1
@@ -275,6 +277,7 @@ To run the entire pipeline, execute the following:
 ````bash
 uv run snakemake --core 30
 ````
+uv run snakemake --configfile ./example_config/config.yaml --cores 30
 
 ## Cleanup Guide
 ### Removing Intermediate Output & Output Files:

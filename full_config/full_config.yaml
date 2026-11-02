@@ -1,0 +1,152 @@
+# config.yaml
+
+
+
+### Samples & Directories ###
+
+# Input, intermediate output and output directories
+# Please ensure your device or server of choice has sufficient storage space for all of the following directories
+
+input_dir: "./input"
+# input_dir: "/home/chulfyp1/data/Motif_Analysis_Automation/example_seq"
+# raw NGS reads should be downloaded into input_dir/
+
+intermediate_dir: "./intermediate_files"
+# intermediate output files will be exported here
+
+preprocessed_seq_dir: "preprocessed_sequences"
+# preprocessed-seq_dir is located inside intermediate_dir for storing preprocessed and collapsed sequences in .tsv format
+
+output_dir: "./output"
+# this stores the final output files
+
+# Sample names & parameters
+sample_sheet: "./full_config/samples.csv"
+# change the names and parameters here to your liking
+
+#############################
+
+
+
+### Sequence Preprocessing ###
+# Preprocessing parameters are configured in the sample sheet
+##############################
+
+
+
+### Dictionary Mapping & Scatter Plot Generation ###
+
+# Count Filters
+# For full dataset, use 100, 50, 20, 20
+dict_min_count_rep1: 100 
+dict_min_count_rep2: 50 
+clv_min_count_rep1: 20 
+clv_min_count_rep2: 20 
+
+# Length Filters
+# For full dataset, use 15, 25
+min_insert_len: 15
+max_insert_len: 25
+
+# Set the following to 4000 for full dataset
+top_n_seq: 4000
+
+# Output paths of various files can be modified at `out:` and `out_template:`
+
+# Supp-Fig-3a,b: dictionary depth
+supp3ab:
+  out: supp_fig/supp3ab_dict_depth.pdf
+
+# Supp-Fig-4a,b and 5a,b: per-replicate depth and efficiency
+supp4a:
+  out: supp_fig/supp4a_rep1_clv_depth.pdf
+supp4b:
+  out: supp_fig/supp4b_rep2_clv_depth.pdf
+supp5a:
+  out: supp_fig/supp5a_rep1_clv_eff.pdf
+supp5b:
+  out: supp_fig/supp5b_rep2_clv_eff.pdf
+
+# Supp-Fig-6a: rank-grouped relative cleavage efficiency
+# The loop below produces one figure per protein sequence pair (CR+NP)
+# separate into the bins [0, 400, 1600, 4000, .inf] for full dataset
+supp6a: 
+  out_template: supp_fig/supp6a_{protein}_clv-eff.pdf 
+  bins: [0, 400, 1600, 4000, .inf]
+  labels: ["Top400", "Top401–1600", "Top1601–4000", "The rest"] 
+  colors: ["tab:blue", "tab:orange", "tab:green", "tab:red"] 
+
+# Fig-2c,e: per-sample motif-scatter recipes
+# plot compares 2 replicates, please comment out if only 1 replicate is involved
+motif_figs: 
+  Lbu-CR: 
+    motif_type: 2nt_motif 
+    n_top: 5 
+    n_bottom: 0 
+    highlight: null 
+    xlim: [0.1, 0.37] 
+    ylim: [0.4, 1.9] 
+    out: main_fig/fig2c_lbu_motif-clv-eff.pdf 
+  Lwa-CR: 
+    motif_type: 2nt_motif 
+    n_top: 3 
+    n_bottom: 0 
+    highlight: "CT" 
+    xlim: [0.22, 0.6] 
+    ylim: [0.9, 1.9] 
+    out: main_fig/fig2c_lwa_motif-clv-eff.pdf 
+  Bt3-CR: 
+    motif_type: 2nt_motif 
+    n_top: 1 
+    n_bottom: 0 
+    highlight: null 
+    xlim: [0.2, 0.45] 
+    ylim: [0.75, 2.45] 
+    out: main_fig/fig2c_bt3_motif-clv-eff.pdf 
+  Rfx-CR: 
+    motif_type: 2nt_motif 
+    n_top: 1 
+    n_bottom: 0 
+    highlight: null 
+    xlim: [0.3, 0.56] 
+    ylim: [0.65, 2.9] 
+    out: main_fig/fig2c_rfx_motif-clv-eff.pdf 
+  Psp-CR: 
+    motif_type: 3nt_motif 
+    n_top: 7 
+    n_bottom: 3 
+    highlight: null 
+    xlim: [0.15, 0.47] 
+    ylim: [0.8, 2.8] 
+    out: main_fig/fig2e_psp_motif-clv-eff.pdf 
+
+# Fig-2f: motif boxplot + Mann-Whitney vs reference, for Psp only
+fig2f:
+  target:     "Psp-CR"
+  motifs:     ["TAT", "TCA", "CAA", "GTT"]
+  reference:  "GTT"
+  rep1_ylim:  [0, 1]
+  rep2_ylim:  [0, 6]
+  out:        main_fig/fig2f_psp_clv-eff.pdf
+  stats_out:  main_fig/fig2_psp_mann-whitney.tsv
+
+# ---- Tables ----
+mapped_clv_table:
+  out: mapped_clv_seq_full.xlsx
+
+####################################################
+
+
+
+### pLogo Generation with kpLogo Package ###
+
+max_k: 1
+min_count: 0
+p_cutoff: 0.05
+fdr: false
+region: null
+weighted: false
+ranked: false
+extra_args: "-plot s -stack_order -1 -fix 1.1 -pseudo 2.5"
+
+############################################
