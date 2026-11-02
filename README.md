@@ -277,7 +277,7 @@ To run the entire pipeline, execute the following:
 ````bash
 uv run snakemake --core 30
 ````
-uv run snakemake --configfile ./example_config/config.yaml --cores 30
+uv run snakemake --configfile ./example_config/example_config.yaml --cores 30
 
 ## Cleanup Guide
 ### Removing Intermediate Output & Output Files:

@@ -10,18 +10,18 @@
 input_dir: "input"
 # raw NGS reads should be downloaded into input_dir/
 
-intermediate_dir: "./intermediate_files"
+intermediate_dir: "intermediate_files"
 # intermediate output files will be exported here
 
 preprocessed_seq_dir: "preprocessed_sequences"
 # preprocessed-seq_dir is located inside intermediate_dir for storing preprocessed and collapsed sequences in .tsv format
 
-output_dir: "./output"
+output_dir: "output"
 # this stores the final output files
 
 # Sample names & parameters
 
-sample_sheet: "./example_config/examples.csv"
+sample_sheet: "example_config/examples.csv"
 # change the names and parameters here to your liking
 
 #############################
@@ -49,7 +49,7 @@ min_insert_len: 15
 max_insert_len: 25
 
 # Set the following to 4000 for full dataset
-top_n_seq: 40
+top_n_seq: 4000
 
 # Output paths of various files can be modified at `out:` and `out_template:`
 
@@ -79,7 +79,7 @@ supp6a:
 # Fig-2c,e: per-sample motif-scatter recipes
 # plot compares 2 replicates, please comment out if only 1 replicate is involved
 motif_figs:
-  LwaExample-CR:
+  Lwa-CR:
     motif_type: 2nt_motif 
     n_top: 3 
     n_bottom: 0 

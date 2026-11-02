@@ -156,7 +156,7 @@ rule convert_to_tsv:
 # Call generate_plots.py
 rule generate_plots:
     input:
-        "config.yaml",
+        *workflow.configfiles,
         expand(f'{PPSEQ_DIR}/{{replicate}}_{{protein}}-{{type}}.collapsed.tsv',
                zip,
                replicate=[r for (r, _, _) in PAIRS],
@@ -176,7 +176,9 @@ rule generate_plots:
                protein=[p for (_, p, t) in PAIRS if t != "DT"],
                type=[t for (_, _, t) in PAIRS if t != "DT"]),
     params:
-        config_path = os.path.abspath("config.yaml"),
+        config_path = lambda w: os.path.abspath(str(workflow.configfiles[0]))
+                                 if workflow.configfiles
+                                 else os.path.abspath("config.yaml"),
     threads: 1
     script: "generate_plots.py"
 
